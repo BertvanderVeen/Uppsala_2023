@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Statistical frontiers in ecology</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Bert van der Veen" />
+    <meta name="author" content=" " />
+    <script src="HO_files/header-attrs-2.20/header-attrs.js"></script>
+    <link href="HO_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="HO_files/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      });
+    </script>
+    <style>
+    .mjx-mrow a {
+      color: black;
+      pointer-events: none;
+      cursor: default;
+    }
+    </style>
+    <link rel="stylesheet" href="cols.css" type="text/css" />
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Statistical frontiers in ecology
+]
+.subtitle[
+## Hierarchical ordination, JSDMs, and all that.
+]
+.author[
+### Bert van der Veen
+]
+.author[
+### <br>
+]
+
+---
+
+
+layout:true
+&lt;div class="my-footer"&gt;&lt;div class="my-footer-nested-left"&gt;&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;fill:white;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"&gt;&lt;/path&gt;&lt;/svg&gt;@vdVeenB&lt;/div&gt;
+&lt;div class="my-footer-nested-right"&gt;&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;fill:white;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"&gt;&lt;/path&gt;&lt;/svg&gt;bert.v.d.veen@ntnu.no &lt;/div&gt;&lt;/div&gt;
+
+---
+
+
+&lt;!--
+2) Looking back: community ecology once was on the frontier, doing the quantitative push (see e.g., refs that say so; Austin 1985, Walker 2015 https://link.springer.com/article/10.1007/s11258-015-0467-7#Sec2, Ovaskainen &amp; Abrego pp 30)
+  - Ordination was one of the few methods available for multivariate techniques (OK, besides clusttering methods)
+  - Was recognized by ter Braak and Gauch in the 80s, but computational power was missing (Warton, Walker)
+  - These days, there are much more statistical methods available for multivariate analysis:
+    - e.g., HMMs, Mixture models, V/MGLMs, GLLVMs, not to mention all kinds of network approaches from machine learning
+    - Ordination is still most applied multivariate method in ecology (Ovaskainen &amp; Abrego)
+  - Now ordination is deemed descriptive: Ovaskainen and Abrego (pp), yet it is still a very useful tool for many ecologists
+  - However, it is not "cool" anymore. But easy to understand and use.
+  - ter Braak and prentice: many methods are heuristic but useful in practice.
+3) In this presentation, I will make the point that ordination is/can be still quantitative. Yet development has stalled a little
+  - many new flavors of existing techniques, but few new ones (ok, PRC and work by Yee) but it isn't adopted for some reason
+  - This push comes from community ecology and is not recent (Jackson, hui, Boral, Warton)
+  - Partly based on the JSDM crowd
+  - partly because "classical methods" have been shown to be bad (distance metrics and such).
+4) We go back a little. Jackson and the JSDM from Pollock (also mention their examples)
+  - Has come from the intention to study "biotic interactions" and for binary data, i.e., to predict occurrence
+  - However, cannot be inferred from JSDMs, yet they have on the rise! Ordination is neglected.
+  - Ovaskainen connected the JSDM to proper ecological foundations
+  - Warton et al. 2015: We are now entering a third phase in methods for multivariate analysis in ecology. This has been driven by the advent of sophisticated hierarchical modeling tools, a watershed for complex problems that arise in ecology 
+  
+5) I (with  others) have been working on the ordination side. Because correlation plots are useless
+- Difference between JSDMs and Ordination? Spatial scale and crowd. Yet they are the same!
+  - ordination has long since focussed not only on pres/ab, but also on measures of frequency
+- Either how, JSDMs are used in a narrow field while ordination is used in many fields, beyond community ecology
+  - e.g., quantitative genetics, morphometrics, toxicology, but also the social sciences
+- The main goal of this has been to make new ordination methods more available and suitable for ecologists
+- We have an R package that does this quickly, but there are also other software implementations
+6) The last chapter of my PhD suggests the new hierarchical ordination model
+- I see this as an overarching framework, it can include different sources on data
+  - in community ecology abundance, environment, traits, phylogeny and space
+  - or quantitative genetics, measures of traits (on individuals) with measures of individuals (X), predictors of traits (environment?), relatedness of individuals and correlation between traits (phenotypic correlation)
+    - species and individuals
+  - or spatiotemporal, or many more applications are included
+- It includes a lot of complex components, but should the ideal combination of ecology, complex statistical methodology, and easy-to-use application/inference
+6) The point is not that these methods are "new" but that they function better! And give more flexibility to answer ecological questions that we have
+- This does come at a cost; steeper learning curve, software is in active development, etc.
+- But, for teaching that is helpful as it provides a unified framework: glm/mglm - glmm/JSDM (mglmm) - Ordination
+
+7) Where to next? Wide-scale use and phasing out of classical methods.
+- gives the field a new method to rally around
+- pushing the statistical practice and giving the opportunity for new/better ecology
+- a new  framework to center typical multivariate studies around. Not to reinvent the ecology but to improve the anlaysis.
+- Pauyl Walker aready said it; the field is stuck with methods from the 80s, not moving on. Stagnant.
+- This framework has the potential to change that. To revitalize the field. Like lme4 has done, and MCMCGLMM for phylogenetics.
+8) Part of a bigger push for better statistical practices in community ecology, more process-based less metric-based.?&gt;
+--&gt;
+
+
+
+# What is this presentation about?
+
+- Part I: a brief history of ordination
+- Part II: The JSDM
+- Part III: Model-based ordination
+- Part IV: My vision for the (near?) future
+
+---
+
+class:center
+
+# Multivariate analysis
+
+.pull-left[
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="HO_files/figure-html/unnamed-chunk-1-1.png" alt="CCA of dune data" width="70%" /&gt;
+&lt;p class="caption"&gt;CCA of dune data&lt;/p&gt;
+&lt;/div&gt;
+
+]
+
+.pull-right[
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="HO_files/figure-html/unnamed-chunk-2-1.png" alt="JSDM of spider data" width="70%" /&gt;
+&lt;p class="caption"&gt;JSDM of spider data&lt;/p&gt;
+&lt;/div&gt;
+
+]
+
+???
+
+-the left is what most people remember
+-but the right is what is now cool
+
+---
+
+# Use of ordination
+- To arrange species and samples in a low-dimensional space
+  - or any column and row quantity really
+- Summarize data
+- In order to find underlying structures (gradients - process based)
+- Analyze community datasets of frequencies
+
+--
+
+## One of the most used methods of multivariate analysis in ecology (but definitely not the only one)
+
+---
+
+# A brief history of ordination
+
+- Thoughts from community ecology perspective
+- A long history
+
+### And me:
+
+&lt;img src="test.jpg" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# A brief history of ordination
+.pull-left[
+
+&lt;img src="MP_timeline_17-04-2023.png" width="70%" height="99%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+&lt;img src="J_Birks_timeline.png" width="70%" height="99%" style="display: block; margin: auto;" /&gt;
+]
+
+- inspired by Michael Palmer's and John Birk's
+- But in need of a little update
+
+---
+
+# In the begnning, there were PCA and FA
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-6-1.png" width="1080" /&gt;
+
+???
+
+make a point that some of these methods have been out for a long time (constrained, unconstrained).
+
+---
+
+# Then, CA and LDA were developed
+&lt;img src="HO_files/figure-html/unnamed-chunk-7-1.png" width="1080" /&gt;
+
+---
+
+# Next, reduced rank regression
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-8-1.png" width="1080" /&gt;
+
+---
+
+# Then, there was "Ordination"
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-9-1.png" width="1080" /&gt;
+
+???
+
+- PO: first real ecological method
+- whittaker first observed approximate Gaussian responses: start of process-based thinking (see also next slide)
+
+---
+
+
+# Whittaker 1956: Unimodal responses
+
+&lt;img src="Whittaker_1956_quadratic.png" width="60%" height="60%" style="display: block; margin: auto;" /&gt;
+
+???
+
+- Whittaker (1956) observed unimodal responses
+- Approximately "Gaussian"
+- Spiked process-based thinking for ordination methods
+
+
+---
+
+# Distance-based ordination
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-11-1.png" width="1080" /&gt;
+
+
+---
+
+# Ordination became popular
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-12-1.png" width="1080" /&gt;
+
+???
+
+- It was part of a push for more quantitative methods
+- Computers were on the rage, 
+- NMDS was still considered "computationally intensive"
+
+---
+
+# Mark Hill's contributions
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-13-1.png" width="1080" /&gt;
+
+- DCA was developed
+- DECORANA
+- TWINSPAN
+
+---
+
+# CTB did his PhD
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-14-1.png" width="1080" /&gt;
+
+- The unmodal model continued
+- Canoco!
+
+???
+
+- Canoco was (I think) first "easy to use" software, instead of just a bunch fo fortran routines
+- (long since abandoned now, by most)
+
+---
+
+# Unimodal model (2)
+
+&lt;img src="Gauch_et_al_1974.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="terBraak_1985.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+
+???
+
+- unimodal model was adopted for ordination
+- formulated the "Gaussian" (quadratic) model
+  - too difficult/unstable to fit
+- CA was "approximate" MLE
+  - lacked typical model-based measures
+- Supported by McArthur's work (lotka volterra)
+
+---
+
+# NMDS was shown to be "better"
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-17-1.png" width="1080" /&gt;
+
+- The unimodal model
+- Development of CCA
+- Twinspan, Canoco, Decorana!
+
+???
+
+- Than DCA (people already didn't like CA for its faults)
+
+---
+
+# Are species response curves symmetric?
+
+&lt;img src="Minchin_1987.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+- Skewed might be more realistic
+- NMDS is "robust"
+- Moving away from process-based
+
+
+???
+
+- motivated by process-based thinking (not unimodal model)
+- but not process-based/worse interpretation!
+- I think a mistake.
+
+---
+
+# A theory for gradient analysis
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-19-1.png" width="1080" /&gt;
+
+
+"Ter Braak and Prentice (1988) developed a theoretical unification of ordination techniques, hence placing gradient analysis on a firm theoretical foundation." (Michael Palmer)
+
+???
+
+no improvement of process-based thinking
+
+---
+
+# I was born :)
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-20-1.png" width="1080" /&gt;
+
+---
+
+# db-RDA &amp; PRC came a bit later
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-21-1.png" width="1080" /&gt;
+
+- Probabilistic PCA
+
+???
+
+- Process-based thinking went out of the window..
+
+---
+
+# Development of ordination methods
+
+&lt;img src="HO_files/figure-html/timeline-1.png" width="1080" style="display: block; margin: auto;" /&gt;
+
+- And then things went quiet(er)
+- Ordination became "descriptive" and uncool
+
+---
+
+# Ordination is well established
+
+- one of the successes currently: so many resources!
+  - vegan, anadat
+  - many books, websites (Michael Palmer, David Zeleney)
+  - I.e., run a search and you will find the answer
+- Contemporary ordination methods, not so much (yet)
+
+---
+
+
+# Nothing since the 90s?
+
+&lt;img src="HO_files/figure-html/timeline2-1.png" width="1080" style="display: block; margin: auto;" /&gt;
+
+- this is where most courses broadly stop
+- Dun dun dun.. stagnation (courses in Norway still teach only methods from 90s)
+
+???
+
+- But the development for R and computational advances have changed the outlook
+- resources do not include new developments
+- courses still taught the same way as 20 years ago (ok, now with R)
+
+---
+
+# Updating the ordination timeline
+
+&lt;img src="HO_files/figure-html/timeline3-1.png" width="1080" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Ditching the machine learning developments
+
+&lt;img src="HO_files/figure-html/timeline4-1.png" width="1080" style="display: block; margin: auto;" /&gt;
+
+- An incomplete timeline
+- Not my expertise and not very widespread (yet)
+
+???
+
+- has potential
+- only a few applications in ecology currently (see ref UMAP and roberts t-SNE)
+- have their role, but for summarizing dataset
+- not for ecological inference/process-based thinking
+
+---
+
+# Eigenanalysis-based methods
+
+&lt;img src="HO_files/figure-html/timeline4b-1.png" width="1080" style="display: block; margin: auto;" /&gt;
+
+- had few conceptual advances
+- slowed down quite a bit since the 80s
+
+---
+
+# Timeline model-based ordination
+
+&lt;img src="HO_files/figure-html/timeline5-1.png" width="1080" style="display: block; margin: auto;" /&gt;
+
+- still a little crowded
+- a very active field
+
+???
+
+- we arrive at the final timeline
+
+---
+
+class: middle,clear,center
+
+## The 3 schools of ordination
+
+1) .orange["Simple-method"]
+
+2) .blue["Algorithm-based"]
+
+3) .green["Model-based"]
+
+???
+
+-  anywho, we now have 3 schools in ordination
+- just to clarify
+
+---
+
+class: middle,clear,center
+
+## The 3 schools of ordination
+
+.pull-left[
+1) .orange["Simple-method"]
+
+2) .blue["Algorithm-based"]
+
+3) .green["Model-based"]
+
+]
+
+.pull-right[
+.orange[Principal Component Analysis]&lt;br&gt;
+.orange[(Detrended) Correspondence Analysis]
+
+.blue[Non-metric multidimensional scaling]&lt;br&gt;
+.blue[UMAP]&lt;br&gt;
+.blue[t-SNE]
+
+.green[Row-column interaction models]
+.green[Generalized Linear Latent Variable Models]
+]
+
+
+---
+
+class:clear,center,middle
+
+Distance-based methods deviated from process-based thinking&lt;br&gt;
+Model-based methods &lt;i&gt;reinforce&lt;/i&gt; process-based thinking
+
+--
+
+My work is in &lt;b&gt;model-based ordination&lt;/b&gt;, let's have a closer look.
+
+---
+
+# My PhD in statistics
+
+- Developed UQO
+- Concurrent ordination
+  - gllvm R-package
+- Predicting niche overlap
+- Some applications with plants, bees and fishes
+- Synthesis of old &amp; new methods
+- Proposed HO
+
+--
+
+&lt;img src="8-P1082654.jpg" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+
+???
+
+- very complex ordination methods
+- but more focused on ecological questions
+- cajo has been my role model in some of this, both dutch :)
+
+---
+
+class:clear,middle
+
+## So why is everyone still using old methods?
+
+- Old is not bad
+- Suits needs
+- Lack of resources for new methods
+- Challenging to apply new methods
+- Accessibility
+- Familiarity bias
+
+A lot of my motivation comes from this
+
+
+???
+
+- Old is not bad but these methods are
+- Think that the methods suit needs
+- Cannot find resources
+- Cannot find education
+- Do not know of software/methods
+- I don't know (hair pulling)
+
+---
+
+# Joint Species Distribution Modeling
+
+- First suggested by Pollock/Clark et al. 2014
+- Popularized by Ovaskainen et al. 2017
+
+.pull-left[
+&lt;img src="Ovaskainen_et_al_2017_1.png" width="80%" height="80%" style="display: block; margin: auto;" /&gt;
+]
+
+
+.pull-right[
+&lt;img src="Ovaskainen_et_al_2017_2.png" width="99%" height="99%" style="display: block; margin: auto;" /&gt;
+]
+
+???
+
+- Connected the model to the ecology
+- And the data to the model/ecological questions
+
+---
+
+# Joint Species Distribution Modeling (2)
+
+- A niche process generates data
+- Distributions are driven by 1) environment and 2) interactions
+- Statistically, interaction = correlation of species
+- So we model that:
+
+`\begin{equation}
+g(\text{E}(y_{ij}|\boldsymbol{X}_i)) = \beta_{0j} + \boldsymbol{X}_i^\top \boldsymbol{\beta}_j + \epsilon_{ij}, \qquad \boldsymbol{\epsilon}_i \sim \mathcal{N}(0,\Sigma)
+\end{equation}`
+
+- Can be fit using standard mixed-effects modeling software.
+
+.center[.font120[In &lt;tt&gt;lme4&lt;/tt&gt;: &lt;br&gt; `glmer(abundance~species+x:species+(0+species|sites),family="poisson",data=data)`]]
+
+???
+- just a multivariate model (swap species with really anything else)
+Otso/Pollock
+- process-based thinking but different angle? Correlation.
+- Ordination went on hold a bit after that, but enter..JSDM/biotic interactions!
+
+---
+
+# "Fun" ecological inference
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="Warton_2015_alpineplants.jpg" alt="Warton et al. 2015 Alpine plants" width="60%" height="60%" /&gt;
+&lt;p class="caption"&gt;Warton et al. 2015 Alpine plants&lt;/p&gt;
+&lt;/div&gt;
+
+- but, `\(\Sigma\)` has `\(p(p+1)/2\)` parameters (which increases quadratically with # species)
+- JSDMs usually converge horribly and are slow to fit
+
+---
+
+class:clear,middle,center
+
+## Since then
+
+&lt;img src="Pichler_Hartig_2021.png" width="90%" height="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: clear
+
+## Enter: Generalized Linear Latent Variable Models
+
+- GLLVM for short
+- Add "factor analytic" structure to `\(\Sigma\)`
+- `\(\epsilon_{ij} = \boldsymbol{u}_i^\top \boldsymbol{\theta}_j\)`
+  - i.e. `\(\boldsymbol{\epsilon}_i \sim \mathcal{N}(0,\boldsymbol{\theta}_j\boldsymbol{\theta}_j^\top)\)`
+- Faster and fewer parameters:
+  - Number of parameter doesn't grow so fast
+
+`\begin{equation}
+\Sigma = \begin{bmatrix}
+ \theta_{11} &amp; 0 &amp; 0 \\
+ \theta_{12} &amp; \theta_{22} &amp; 0 \\
+ \vdots &amp; \ddots &amp;  \vdots \\
+ \theta_{1j} &amp; \cdots &amp; \theta_{dj} 
+ \end{bmatrix}
+ \begin{bmatrix}
+ \theta_{11} &amp; \theta_{12} &amp; \cdots &amp;  \theta_{1j} \\
+  0 &amp; \theta_{22} &amp; \ddots &amp; \vdots \\
+  0 &amp; 0 &amp; \cdots &amp; \theta_{dj}
+ \end{bmatrix}
+\end{equation}`
+
+???
+
+- GLLVMs are for FA what GLMs are for LM
+
+???
+
+- OK, but then we are at the same place?
+- yes but no; model is super flexible and more complex than any other ordination method
+- it is a next step in the evolution of ordination
+- Ignores 100 years ordination method developments
+- e.g., a linear model!!, we see that next
+
+
+
+---
+
+# Huh, this is ordination
+
+- More dimensions, better estimation of `\(\Sigma\)`
+- Each dimension is a "latent variable" so ordination!
+
+&lt;img src="REord_Jackson_2011.png" width="90%" height="90%" style="display: block; margin: auto;" /&gt;
+
+
+???
+
+- Eek this doesn't work - enter GLLVM
+- Gauch et al. 1974 already connected ordination with SDM, but this has long since forgotten
+- Not until 2015 was this better recognized?
+
+---
+
+# Distance-based analysis do badly
+
+&lt;img src="distance.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+- also see response by Roberts
+
+???
+
+- And reply by Warton and others again..
+
+---
+
+# Model-based ordination
+
+
+&lt;img src="Hui_et_al_2015.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+.center[
+&lt;img src="modelbased_francis1.jpg" width="30%" height="30%" /&gt;&lt;img src="modelbased_francis2.jpg" width="30%" height="30%" /&gt;
+]
+
+???
+
+- LV is "unobserved" so random-effect?
+- Or to induce correlation
+- CTB already noted this in 1985.
+- Francis compared model-based with classical.
+
+---
+
+# Different viewpoints
+
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="robertsen.png" alt="Distance-based outperforms model-based" width="70%" height="70%" /&gt;
+&lt;p class="caption"&gt;Distance-based outperforms model-based&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="Jupke.png" alt="Both have their place" width="70%" height="70%" /&gt;
+&lt;p class="caption"&gt;Both have their place&lt;/p&gt;
+&lt;/div&gt;
+
+--
+
+My opinion: Yes!
+
+
+???
+- Compared model-based with NMDS &amp; t-SNE
+- Distance-based outperformed model-based (Boral, REO)
+- A fued was born?
+- My opion: the way that Roberts did his analysis was weird, and does not give an accurate picture
+- I think generally model-based outperforms distance-based.
+
+---
+
+
+class: middle,clear,center
+
+## Earlier that decade..
+
+&lt;img src="Yee_CQO_2004.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="Yee_CAO_2004.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+???
+
+- Yee was busy developing new methods for constrained ordination
+- was never really adopted for some reason
+
+
+---
+
+# Concurrent ordination
+
+- van der Veen et al. 2022
+- Combines recent developments in model-based constrained &amp; unconstrained ordination
+- As well as historical push for unimodal models
+- Constrained ordination with random-effects
+
+`\begin{equation}
+\eta_{ij} = \beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\gamma}_j
+\end{equation}`
+
+with `\(\boldsymbol{z_i} = \boldsymbol{B}^\top\boldsymbol{x}_i + \boldsymbol{\epsilon}_i\)`
+
+- can be extended with unimodal model
+
+--
+
+&lt;img src="van_der_Veen_et_al_2022.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+
+???
+
+All that was left was to combine things;
+- constrained ordination with RE
+- and concurrent ordination
+- I think major conceptual development
+- If variance of residual&gt;0 canonical coefs will be biased
+- truely a linear regression unlike constrained ordination (that requires perfect representation)
+
+---
+
+# Example concurrent: alpine plants
+
+&lt;img src="fig2.jpg" width="90%" height="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Example concurrent: alpine plants (2)
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-37-1.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Example concurrent: alpine plants (3)
+
+&lt;img src="HO_files/figure-html/unnamed-chunk-38-1.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+???
+
+- could be used to determine if there are species groups for which covariates are missing..
+- for everything else, pretty useless
+
+---
+
+# Model-based ordination
+- more flexible &amp; statistically appropriate
+- now straightforward available
+- very much in active development
+- has a steep learning curve &amp; computational difficulties
+
+Allows us to do all kinds of fun things
+- Residual diagnostics
+- Species-specific effecs from constrained ordination
+- Random-effects
+- Flexible models
+- Etc.
+
+---
+
+class:clear,center,middle
+
+## .font70[Multivariate data arises in many ecological disciplines]
+
+.pull-left[
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="smoky_mountains_schematic_picture2.jpg" alt="Communities" width="60%" /&gt;
+&lt;p class="caption"&gt;Communities&lt;/p&gt;
+&lt;/div&gt;
+    ]
+.pull-right[
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="butterfly.jpg" alt="Traits" width="50%" /&gt;
+&lt;p class="caption"&gt;Traits&lt;/p&gt;
+&lt;/div&gt;
+]
+
+.pull-left[
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="trend.png" alt="Spatio-temporal dynamics" width="50%" /&gt;
+&lt;p class="caption"&gt;Spatio-temporal dynamics&lt;/p&gt;
+&lt;/div&gt;
+]
+
+.pull-right[
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="squid.jpg" alt="Individual differences" width="50%" /&gt;
+&lt;p class="caption"&gt;Individual differences&lt;/p&gt;
+&lt;/div&gt;
+]
+
+&lt;!--multiple individuals with traits and relatedness,
+multiple measurements of traits that give us Phenotypic variation,
+G matrix genetic of traits
+A matrix relatedness of individuals?!--&gt;
+&lt;!-- traits at sites--&gt;
+&lt;!--individuals at sites with relatedness (probably not)--&gt;
+&lt;!--species at sites with Phylogeny--&gt;
+&lt;!-- individuals, species, traits through space/time--&gt;
+&lt;!-- anything through space and time --&gt;
+
+
+---
+
+# My vision
+
+- I really wanted to combine traits &amp; phylogeny (and space and time) with ordination
+- So we can make quadriplots
+- More complex flavor of double constrained ordination
+- Framework that is applicable to a wide variety of ecological subfields
+
+???
+
+- i.e., combine 5 data matrices
+- ordination with multiple datasets has been done in the past
+- and this is similar to dCCA that CTB recently developed
+- I see this as an overarching framework, it can include different sources on data
+  - in community ecology abundance, environment, traits, phylogeny and space
+  - or quantitative genetics, measures of traits (on individuals) with measures of individuals (X), predictors of traits (environment?), relatedness of individuals and correlation between traits (phenotypic correlation)
+    - species and individuals
+  - or spatiotemporal, or many more applications are included
+- It includes a lot of complex components, but should the ideal combination of ecology, complex statistical methodology, and easy-to-use application/inference
+
+---
+
+# Quadriplot
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="quadriplot.jpg" alt="ter Braak et al. 2018" width="50%" /&gt;
+&lt;p class="caption"&gt;ter Braak et al. 2018&lt;/p&gt;
+&lt;/div&gt;
+
+---
+
+
+# Hierarchical ordination
+
+- in form much more similar to classical ordination
+- but with all model-based jazz
+- `\(\Sigma\)` are a type of singular values under correct standardization
+
+`\begin{aligned}
+\eta_{ij} &amp;= \beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\Sigma}\boldsymbol{\gamma}_j \\
+\boldsymbol{z}_i &amp;= \boldsymbol{B}^\top\boldsymbol{x}_i + \boldsymbol{b}^\top\boldsymbol{u}_j + \boldsymbol{\epsilon} \\
+\boldsymbol{\gamma}_j &amp;= \boldsymbol{\omega}^\top\boldsymbol{T}_j + \boldsymbol{w}^\top\boldsymbol{\lambda}_i + \boldsymbol{\epsilon}
+\end{aligned}`
+
+--
+
+&lt;img src="Ohara_vanderVeen_2023_HO.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+
+
+
+???
+
+Explain equation maybe color parts - we have lmms for the ordination axes &amp; species scores
+
+---
+
+# Hierarchical ordination example
+
+- Fitted with Nimble (MCMC, random walk)
+
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="Ohara_vanderVeen_2023_ants.png" alt="Species plot" width="70%" height="70%" /&gt;
+&lt;p class="caption"&gt;Species plot&lt;/p&gt;
+&lt;/div&gt;
+
+
+---
+
+# HO &amp; the postdoc
+
+- HO is a framework that includes many different models
+  - Concurrent ordination
+  - Constrained ordination
+  - Double constrained ordination
+  - Uconstrained ordination
+  
+## My vision
+- A package for multivariate multilevel analysis in ecology
+  - To "phase out" methods that perform poorly
+- With a simple, formula-based interface (lme4-type)
+  - for both LVs and loadings
+- Hopefully fast to fit
+
+???
+- I do not have the angle/view that it is "bad", "dirty", "not quantitative" or "descriptive"
+  - why can't we include random-effects
+  - why can't we adopt process-based thinking
+  - why shouldn't we use proper statistics
+  - we are only limited by our imagination in these developments (OK, it does require some stubborness)
+- ordination IS one of the most popular methods in ecology so why aren't people moving onto the new methods en mass?
+
+---
+
+
+# The plan
+
+1) Develop new and easy-to-use software 
+(R-package) &lt;br&gt;
+2) The necessary mathematical and statistical machinery &lt;br&gt;
+3) Apply to examples in community ecology, animal behavior, or quantitative genetics &lt;br&gt;
+
+- HO is the ordination frontier
+- It needs to be further developed / finished, and a good software implementation
+
+???
+
+- Software and usability is so critical in ecology
+(see canoco, twinspan, primer, vegan, lme4, mvabund, Boral, gllvm, RCIM, ecoCopula, all the frameworks maybe separate timeline)
+- The fact that the software doesnt exist doesnt mean the method isnt there, but it isnt adopted (constrained NMDS)
+
+---
+
+# Plenty of challenges
+
+- Complex model
+  - products of random-effects
+  - identifiability
+- No analytical solution (need approximate methods)
+- Computationally intensive (need fast fitting)
+- Non-convex objective function (need robust optimization)
+- Usability needs a lot of thought
+
+---
+
+class:clear,middle,center
+
+## Possible syntax
+
+
+```r
+ordinate(y ~ pred1 + (1|ID),
+         cols ~ pred2 + (pred3|treatment),
+         rows ~ pred4, 
+         colsCov = P, rowsCov = expCor(S),
+         dim = 2)
+```
+
+--
+
+- Random-effects help to explore LV-level residual
+- Fixed-effects for the rest
+
+---
+
+# Towards the end
+
+- I think model-based ordination is the way, but not quite there yet
+- developments are very active and we need researchers to push the frontier
+  - ask new questions
+  - show that existing methods are insufficient
+  - apply new advances
+  - update the course material
+- computation is again an active topic.
+- learning curve can be/is steep
+  - ordination should now be taught differently. The model-based angle
+
+---
+
+# Conclusion
+
+- A fourth corner model, MGLM, SEM, JSDM, ordination
+
+&lt;img src="rule.jpg" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Conclusion (2)
+
+- A fourth corner model, MGLM, SEM, JSDM, ordination
+- Incorporate different types of data
+- Decompose different sources of residual covariance
+- A framework for multivariate multilevel analysis in ecology
+- Bonus: can make fancy bi/tri/quadri-plots
+
+---
+
+class:clear,middle
+
+- Ordination is so much more than "a descriptive method"
+- It is a framework for complex (reduced rank) multivariate statistical modeling
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="Jyvaskyla.jpg" alt="Jyväskylä" width="50%" /&gt;
+&lt;p class="caption"&gt;Jyväskylä&lt;/p&gt;
+&lt;/div&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="cols_macro.js"></script>
+<script>var slideshow = remark.create({
+"slideNumberFormat": "<div class=\"progress-bar-container\">\n<div class=\"progress-bar\" style=\"width: calc(%current% / %total% * 100%);\">\n</div>\n</div>\n"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
