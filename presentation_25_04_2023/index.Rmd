@@ -548,7 +548,7 @@ data <- tribble( ~start_date, ~event, ~displ,
                 ymd("2012-01-01"), "Mvabund", -1.2,
                 ymd("2013-01-01"), "INLA", -0.1,
                 ymd("2013-01-01"), "VAE", -0.3,
-                ymd("2014-01-01"), "JSDM", 0.2,
+                ymd("2010-01-01"), "JSDM", 0.2,
                 ymd("2014-01-01"), "RCIM", 0.8,
                 ymd("2015-01-01"), "Model-based thinking", -0.5,
                 ymd("2015-01-01"), "Model-based unconstrained ordination", 0.6,
@@ -775,8 +775,7 @@ A lot of my motivation comes from this
 
 # Joint Species Distribution Modeling
 
-- First suggested by Pollock/Clark et al. 2014
-- Popularized by Ovaskainen et al. 2017
+- First suggested by Ovaskainen et al. 2010
 
 .pull-left[
 ```{r,out.width="80%",out.height="80%", fig.align="center", echo=F}
