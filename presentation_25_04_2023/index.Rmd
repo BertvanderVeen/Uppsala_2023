@@ -778,7 +778,7 @@ A lot of my motivation comes from this
 - First suggested by Ovaskainen et al. 2010
 
 .pull-left[
-```{r,out.width="80%",out.height="80%", fig.align="center", echo=F}
+```{r,out.width="80%",out.height="80%", fig.align="center", echo=F, fig.cap="Figures from Ovaskainen et al. 2017"}
 knitr::include_graphics("Ovaskainen_et_al_2017_1.png")
 ```
 ]
@@ -868,6 +868,7 @@ class: clear
 
 ???
 
+- I.e., ordination is diverging from JSDMs again (JSDM != GLLVM)
 - GLLVMs are for FA what GLMs are for LM
 
 ???
@@ -1166,7 +1167,7 @@ Explain equation maybe color parts - we have lmms for the ordination axes & spec
 - Fitted with Nimble (MCMC, random walk)
 
 
-```{r,out.width="70%",out.height="70%", fig.align="center", echo=F, warning=FALSE, fig.cap="Species plot"}
+```{r,out.width="70%",out.height="70%", fig.align="center", echo=F, warning=FALSE, fig.cap="HO results from Ants dataset (Gibb et al. 2015)"}
 knitr::include_graphics("Ohara_vanderVeen_2023_ants.png")
 ```
 
