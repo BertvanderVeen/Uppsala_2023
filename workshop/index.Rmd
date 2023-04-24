@@ -43,9 +43,6 @@ knitr::opts_knit$set(root.dir="/home/bertv/Dropbox/Uppsala/workshop/")
 
 class:clear,middle
 
-
-add ntnu logo
-
 ## What is this presentation about?
 
 - Brief introduction
