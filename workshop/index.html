@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Model-based ordination</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Bert van der Veen" />
+    <script src="index_files/header-attrs-2.20/header-attrs.js"></script>
+    <link href="index_files/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="index_files/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <script src="index_files/kePrint-0.0.1/kePrint.js"></script>
+    <link href="index_files/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } },
+      });
+    </script>
+    <style>
+    .mjx-mrow a {
+      color: black;
+      pointer-events: none;
+      cursor: default;
+    }
+    </style>
+    <link rel="stylesheet" href="cols.css" type="text/css" />
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Model-based ordination
+]
+.subtitle[
+## with the gllvm R-package
+]
+.author[
+### Bert van der Veen
+]
+.date[
+### .pull-left[<img src="CBD_logo.png" style="width:1in" />] .pull-right[<img src="ntnu.png" style="width:1in" />]
+]
+
+---
+
+
+layout:true
+&lt;div class="my-footer"&gt;&lt;div class="my-footer-nested-left"&gt;&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;fill:white;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"&gt;&lt;/path&gt;&lt;/svg&gt;@vdVeenB&lt;/div&gt;
+&lt;div class="my-footer-nested-right"&gt;&lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;fill:white;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"&gt;&lt;/path&gt;&lt;/svg&gt;bert.v.d.veen@ntnu.no &lt;/div&gt;&lt;/div&gt;
+
+---
+
+
+
+class:clear,middle
+
+
+add ntnu logo
+
+## What is this presentation about?
+
+- Brief introduction
+- Overview of different software packages for model-based ordination
+- In-depth information about the gllvm R-package
+- Some examples
+
+---
+
+# Gathering data
+
+We go out, register species at multiple sites &lt;br&gt;
+
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="heath_picture.png" alt="© Geir-Harald Strand / NIBIO" width="550px" /&gt;
+&lt;p class="caption"&gt;© Geir-Harald Strand / NIBIO&lt;/p&gt;
+&lt;/div&gt;
+
+---
+
+# Gathering data
+
+We go out, register species at multiple sites &lt;br&gt;
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="heath_picture_sites.png" alt="© Geir-Harald Strand / NIBIO" width="550px" /&gt;
+&lt;p class="caption"&gt;© Geir-Harald Strand / NIBIO&lt;/p&gt;
+&lt;/div&gt;
+
+---
+
+# "Multivariate"
+
+
+- What does multivariate mean? &lt;!--TIP: not multiple predictors, but multiple responses --&gt;
+
+- Multivariate: multiple &lt;b&gt;responses&lt;/b&gt;
+- E.g. counts of species at sites
+
+.font70[
+&lt;table class="table" style="margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Species 1 &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Species 2 &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Species 3 &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Species 4 &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Species 5 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; Site 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; Site 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; Site 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+---
+
+# "Multivariable"
+
+- Multiple &lt;b&gt; predictors &lt;/b&gt;
+- E.g. measurements of the environment
+
+.font70[
+&lt;table class="table" style="margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Predictor 1 &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Predictor 2 &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Predictor 3 &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Predictor 4 &lt;/th&gt;
+   &lt;th style="text-align:right;border-bottom: 1px solid; width:100%"&gt; Predictor 5 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; Site 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.3321 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.0445 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.4543 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; Site 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.0493 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.7918 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0986 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.5643 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; Site 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.5572 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.3979 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.6052 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+---
+
+# To clarify
+
+- Both data and model can be univariate or multivariate
+- Multivariate data can be analysed with both multivariate and univariate models (SDM, CA)
+
+- Multivariable data can be used in multivariate or univariate analysis
+  - Generally the same for all responses
+  - (But, note that the model can of course set terms to zero)
+
+---
+
+# Why analyse multivariate data?
+
+- Interest in &lt;b&gt;co&lt;/b&gt;-occurrence patterns
+  - In contrast to &lt;b&gt; occurrence &lt;/b&gt; patterns (a species distribution)
+- Why do species co-occur?
+  - Similar environmental preferences
+  - Similar history in the environment
+  - Might results in **Interactions**
+- Multiple species form a &lt;b&gt; community &lt;/b&gt;
+
+---
+
+# Why analyse multivariate data?
+
+.pull-left[
+.center[.font100[ Occurrence pattern]]
+&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" width="288" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+.font100[Co-occurrence pattern]
+&lt;img src="index_files/figure-html/unnamed-chunk-6-1.png" width="288" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# But then for more species
+.center[
+![](community.png)
+
+&lt;br&gt;**from: Bascompte (2019)**
+
+]
+
+---
+
+
+# Co-occurrence
+
+.pull-left[
+- Occurrence data can tell use about where multiple species occur
+- How species are "associated"
+- Statistically: correlation
+- So we are looking for patterns in our data
+
+]
+.pull-right[
+&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" width="360" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+class: clear,middle,center
+
+## Ecological gradient analysis
+
+.pull-top[
+"Gradient analysis is a research approach for study of spatial patterns of species." .font70[**(Whittaker, 1967)**]&lt;br&gt;
+Our sites describe the environment. Multiple gradients can form a &lt;b&gt;complex&lt;/b&gt; gradient. &lt;br&gt;
+]
+.pull-bottom[
+.font70[
+&lt;table class="table" style="margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predictor 1 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predictor 2 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predictor 3 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predictor 4 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Predictor 5 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-weight: bold;border-right:2px solid red;"&gt; Site 1 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;border-right:2px solid red;"&gt; 2.3321 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;border-right:2px solid red;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.0445 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.4543 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-weight: bold;border-right:2px solid red;"&gt; Site 2 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;border-right:2px solid red;"&gt; 3.0493 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;border-right:2px solid red;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.7918 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0986 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.5643 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;font-weight: bold;border-right:2px solid red;"&gt; Site 3 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;border-right:2px solid red;"&gt; 2.5572 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;border-right:2px solid red;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.3979 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.6052 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+]
+
+---
+
+class: clear
+
+.center[## Ecological gradients]
+
+1) Ecological gradient: gradual change in the environment 
+
+- e.g. temperature
+
+2) Complex gradient: change in several ecological gradients 
+
+- e.g. soil moisture and acidity on an elevation gradient
+- Can be represented as a single factor, covariate, predictor, latent variable, ordination axis
+
+
+---
+
+class:clear,middle,center
+
+Gradients can be &lt;b&gt;observed&lt;/b&gt; or &lt;b&gt;latent&lt;/b&gt;
+
+
+&lt;img src="latent.jpg" width="75%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Ecological gradients
+
+&lt;br&gt;
+
+.center[
+.font170["Few major complex ecological gradients normally account for most of the variation in species composition."] .font70[**(Halvorsen, 2012)**]
+]
+
+
+.center[
+## In essence:
+Community structure is generally low-dimensional.
+
+]
+
+???
+
+There is also coenoclines
+
+---
+
+# Ordination: visual inspection
+
+- Most common tool is the biplot .font70[Gabriel 1971]
+- Distance between species indicates dissimilarity
+- Distance between sites indicates dissimilarity
+
+&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" width="360" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Triplot
+
+- commonly used in constrained ordination
+- three quantities so "tri"
+- arrows indicate environment-axis relationship
+
+&lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" width="360" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+class:clear,middle
+
+## Classical methods have some issues..
+
+- Ordination axis (ecological gradient) treated as fixed (parameter)
+- Horseshoe or arch effect (PCA, CA)
+- Difficult (near to impossible) to check any assumptions
+- Mean-variance relationships .font70[Warton and Hui 2017]
+
+&lt;br&gt;
+
+.center[.font120[&lt;b&gt;In general, not very flexible.&lt;/b&gt;]]
+
+---
+
+# Model-based thinking
+
+- Concept: apply regression concepts to multivariate analysis .font70[Warton et al. 2015]
+  - Explicit statistical models
+  - Residual diagnostics
+  - Model selection
+  - et cetera
+  
+.center[&lt;img src="https://i.imgflip.com/4pnkt7.jpg" width="300"/&gt;]
+  
+---
+
+# A regression
+
+- Think of these as GLMs per column
+- Or a stacked S(A)DM 
+
+`\begin{equation}
+\eta_{ij} = \beta_{0j} + \boldsymbol{X}\boldsymbol{B}
+\end{equation}`
+
+- `\(\boldsymbol{X}\)` are the predictors
+- `\(\boldsymbol{B}\)` are the slopes for all column
+
+---
+
+
+# .font70[Generalized Linear Latent Variable Models]
+
+- GLLVM for short (Skrondal &amp; Rabe-Hesketh, 2004)
+- a "joint" model
+
+`\begin{equation}
+\eta_{ij} = \beta_{0j} + \boldsymbol{Z}\boldsymbol{\Gamma}
+\end{equation}`
+
+- But the predictor(s) are now missing
+- So we predict them instead: that is what `\(\boldsymbol{Z}\)` is
+  - so `\(\boldsymbol{\Gamma}\)` are the coefficients
+- Also known as "ordination axis" or "latent variable" or...
+
+???
+
+- more advanced factor analysis
+- more formal ordination method 
+- unified framework for ordination but also other things
+- mixed-effects models, clustering, anything with latents
+
+---
+
+.left[
+# Benefits from both worlds
+]
+
+.pull-left[
+- Represent the latent complex ecological gradient
+- A model like in regression
+]
+
+.pull-right[
+ 
+- Procrustus analysis
+- Biplots
+- Model-selection
+- Residual diagnostics
+- Appropriate mean-variance relationships
+- No distances
+- Hypothesis testing
+- etc.
+ 
+ ]
+
+ .center[&lt;b&gt;All the benefits from regression and ordination!&lt;/b&gt;&lt;br&gt;
+ (and double the complexity)]
+
+
+---
+
+# Comparing and selecting ordinations
+
+- you fit a model
+- you fit another model
+- which one is better?
+  - information criteria
+  - hypothesis testing
+- but are the ordinations similar?
+  - procrustes rotation
+- variation explained (no eigenvalues)
+
+???
+
+- information criteria; allow to compare non-nested models (APPLY IN MODERATION)
+- hypothesis testing: nested models
+- procrustes rotation: for ordinations only, whatever
+  - can apply certain functions from vegan and other like GPArotation
+
+
+---
+
+# Some brief notes on rotation
+ 
+- LVs are estimated simultaneously
+ - Rotation is not varimax
+ - Solution can be re-rotated afterwards (see e.g., the GPArotation package)
+  - To certain species, to predictors, or by some criterium
+
+&lt;img src="rotation.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+  
+# Different packages
+
+I will briefly go through the different model-based ordination packages
+NB: Quickly expanding field
+
+???
+- few do constrained ordination
+- all unconstrained (partly due to JSDM push)
+- pseudo-code for unconstrained ordination in each package
+
+---
+
+# Boral
+
+&lt;img src="Boral.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+- one of the first model-based ordination packages
+- mostly for unconstrained (or residal) ordination
+- can include column effects (traits)
+- row-effects; row intercepts, structure for LVs, predictors
+- includes gold-standard residuals
+
+???
+
+- By Francis
+- Runs on Jags
+- distance matrix for spatial (usual)
+
+---
+
+class: clear, middle
+
+## Boral: code
+
+
+```r
+install.packages("boral")
+model &lt;- boral::boral(y, lv.control=list(num.lv = 2), family = ...)
+lvsplot(model)
+```
+
+vignette: see paper
+
+???
+
+- more complex models
+
+---
+
+# HMSC
+
+&lt;img src="HMSC.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+- Bayesian; fits with MCMC
+- many options
+- specifically for community modeling
+- phylogeny, traits, row-effects, spatial
+- mostly JSDMs, little support for ordination
+- "infinite factor model"
+
+???
+
+- TBH little experience
+- VERY flexible
+- super popular, many people use
+- not sure what else to say
+- not intended for ordination, but can be used as such
+
+---
+
+class:clear, middle
+
+## HMSC: code
+
+.font70[
+
+
+```r
+install.packages("Hmsc")
+# need to set-up LVs
+studyDesign = data.frame(sample = as.factor(1:nrow(y)))
+rL = HmscRandomLevel(units = studyDesign$sample)
+model &lt;- Hmsc::Hmsc(y, X = as.matrix(spider$x), distr = "poisson", ranLevels = list(sample = rL), studyDesign = studyDesign)
+# Run mcmc
+run = sampleMcmc(model, thin = ..., samples = ..., transient = ...,
+nChains = ...)
+# make biplot
+etaPost=getPostEstimate(run, "Eta")
+lambdaPost=getPostEstimate(run, "Lambda")
+biPlot(run, etaPost = etaPost, lambdaPost = lambdaPost, factors = c(1,2))
+```
+
+]
+
+vignette: https://cran.r-project.org/web/packages/Hmsc/vignettes/vignette_2_multivariate_low.pdf
+
+---
+  
+# ecoCopula
+&lt;img src="ecoCopula.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+- extremely fast (faster than NMDS); fits with gaussian copulas
+- graphical modeling; 
+- can visualize "direct associations"
+- gold-standard residuals
+- requires a secondary model
+
+
+???
+
+Parallelization
+
+---
+
+class:clear,middle
+
+## ecoCopula: code
+
+
+```r
+install.packages(c("ecoCopula","mvabund"))
+pre_model &lt;- mvabund::manyglm(y, family = ...)
+model &lt;- ecoCopula::cord(pre_model, nlv = 2)
+plot(model,biplot = TRUE)
+```
+
+vignette: https://cran.r-project.org/web/packages/ecoCopula/vignettes/the_basics.html
+
+---
+
+# VGAM
+&lt;img src="VGAM.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.font70[
+.pull-left[
+- fits with maximum likelihood
+- massive package with a lot of functionality
+- constrained and unconstrained ordination
+- UQO, CQO, CAO
+]
+.pull-right[
+- residuals
+- not great to use (can be unstable)
+- mostly for ordination
+- no random-effects
+]
+
+]
+---
+
+class:clear,middle
+
+## VGAM: code
+
+
+```r
+install.packages("VGAM")
+model &lt;- VGAM::rcim(y, Rank = 2, family = ...)
+lvplot(model)
+```
+
+vignette: (see book)
+
+---
+
+# glmmTMB
+&lt;img src="glmmTMB.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+- fits with Laplace approximation
+- great usability
+- can include many random-effects
+- unconstrained ordination only
+- relatively slow
+
+???
+
+can be a bit messy
+
+---
+
+class:clear,middle
+
+## glmmTMB: code
+
+- data needs to be in long format
+
+
+```r
+install.packages("glmmTMB")
+# organize data into long format
+sppTot &lt;- sort(colSums(y), decreasing = TRUE)
+tmp &lt;- data.frame(y)
+tmp$id &lt;- 1:nrow(tmp)
+glmmDat &lt;- reshape(tmp,
+                     idvar = "id",
+                     timevar = "col",
+                     times =  colnames(y),
+                     varying = list(colnames(y)),
+                     v.names = "y",
+                     direction = "long")
+model &lt;- glmmTMB::glmmTMB(y ~ col + rr(col + 0|id, d = 2), data = glmmDat, family = ...)
+```
+
+vignette: https://cran.r-project.org/web/packages/glmmTMB/vignettes/covstruct.html
+
+---
+
+# gmf
+
+.pull-left[
+&lt;img src="gmf.png" width="99%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+
+- very quick; fits by penalized likelihood
+- unconstrained ordination only
+- no extra random-effects
+- can be unstable
+
+]
+
+---
+
+class:clear,middle
+
+## gmf: code
+
+
+```r
+devtools::install_github("https://github.com/kidzik/gmf")
+model &lt;- gmf::gmf(y, family = ..., p = 2)
+```
+
+---
+
+# RCM
+&lt;img src="RCIM.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+- constrained and unconstrained ordination
+- additive constrained ordination
+- few distributions
+- not a "true" statistical model
+
+???
+
+- no CI or hypothesis testing
+developed with eye on microbial community ecology
+
+---
+
+class:clear,middle
+
+## RCM: code
+
+
+```r
+devtools::install_github("https://github.com/CenterForStatistics-UGent/RCM")
+model &lt;- RCM::RCM(y, k = 2)
+plot(model)
+```
+
+vignette: https://github.com/CenterForStatistics-UGent/RCM
+
+---
+
+class:clear,middle
+
+## Experimental: latent INLA
+
+&lt;img src="latentINLA.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+- Relatively fast; Bayesian with Laplace approximation
+- unconstrained and concurrent ordination
+- spatial effects? work in progress
+
+---
+
+class:clear,middle
+
+## latent INLA: code
+
+
+```r
+devtools::install_github("https://github.com/oharar/LatentINLA")
+model &lt;- FitGLLVM(Y=Y, Family="poisson", nLVs = 2)
+```
+
+vignette: https://github.com/oharar/LatentINLA/blob/main/vignettes/How-A-Simple-Model-Works.Rmd
+
+---
+
+# gllvm
+
+&lt;img src="gllvm.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+- relatively fast
+- many different models for concurrent, constrained, unconstrained ordination
+- can include extra random-effects
+- quite robust
+- CI, hypothesis testing
+- gold-standard residuals
+
+---
+
+class:clear,middle
+
+## gllvm: code
+
+
+```r
+install.packages("gllvm")
+model  &lt;- gllvm::gllvm(y, num.lv = 2, family = ...)
+```
+
+vignette: https://jenniniku.github.io/gllvm/index.html
+
+---
+
+# Software summary
+
+.font70[
+&lt;table class="table" style="margin-left: auto; margin-right: auto;"&gt;
+&lt;caption&gt;R-packages for model-based ordination&lt;/caption&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt; package &lt;/th&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt; cran &lt;/th&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt; UO &lt;/th&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt; CO &lt;/th&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt; CN &lt;/th&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt; RE &lt;/th&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt; CI &lt;/th&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt; traits &lt;/th&gt;
+   &lt;th style="text-align:left;border-bottom: 1px solid; width:100%"&gt; framework &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; gllvm &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes/some &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; frequentist &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; Boral &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; some &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; bayes &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; HMSC &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; bayes &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; ecoCopula &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; frequentist &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; VGAM &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; half &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; frequentist &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; glmmTMB &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; frequentist &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; gmf &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; frequentist &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; RCM &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; frequentist &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;border-right:1px solid;"&gt; latent INLA &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; not yet &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; no &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; bayes &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+???
+- ignore NIMBLE, TMB and other frameworks.
+- explain some differences: RCM not "proper" model-based
+- additve constrained ordination
+- I  will take you through some of themm
+- gllvm can do all sorts of ordinations, and with random-effects (only package), so flexible
+
+---
+
+# The gllvm R-package
+
+&lt;img src="gllvm.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.pull-left[
+- first published in 2017
+- (relatively) fast model fitting
+- but loads of developments since then
+- now a solid package for ordination
+]
+.pull-right[
+
+- account for properties of data
+- residual diagnostics
+- model-selection tools
+- typical conditions of statistical modeling
+- flexible framework: straightforward to extend
+
+]
+
+note gllvm website: https://jenniniku.github.io/gllvm/index.html
+
+???
+
+- typical conditions: large sample theory
+
+
+---
+
+class:clear,center,middle
+
+&lt;img src="jenni2.jpeg" width="30%" /&gt;&lt;img src="hui.jpg" width="30%" /&gt;&lt;img src="pekka.jpg" width="30%" /&gt;&lt;img src="sara.jpeg" width="30%" /&gt;&lt;img src="warton.jpg" width="30%" /&gt;&lt;img src="bob.jpg" width="30%" /&gt;
+
+Jenni Niku (JYU), Francis Hui (ANU), Pekka Korhonen (JYU), Sara Taskinen (JYU), David Warton (UNSW), Bob O'Hara (NTNU)
+
+???
+
+many people are involved, here are some
+
+---
+
+# Brief brief history of gllvm
+
+&lt;img src="Hui_et_al_2015.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+--
+
+&lt;img src="NikuLA.png" width="33%" /&gt;&lt;img src="HuiVA.png" width="33%" /&gt;&lt;img src="KorhonenEVA.png" width="33%" /&gt;
+
+- a search for fast (and flexible) fitting methods
+- because life is too short for MCMC
+
+???
+
+- all started with Hui 2015
+- then the push for bringing things to ecology started
+
+---
+
+# Likelihood
+
+The likelihood for a GLLVM is:
+`\begin{equation}
+\mathcal{L}(\Theta;\boldsymbol{Y}) = \prod \limits_{i=1}^n \displaystyle\int \prod \limits_{j=1}^p \color{red}{f\biggl(y_{ij} \vert \boldsymbol{z}_i, \Theta\biggr)}\color{blue}{h\biggl(\boldsymbol{z}_i\biggr)} d\boldsymbol{z}_i ,
+\label{gllvm}
+\end{equation}`
+
+- similar to glmm but "worse"
+- fitted by (E)VA or LA
+- why is this important to know?
+
+???
+
+- behaviors of different esitmaiton methods
+- because there are details to controlling the estimation that we can get back to later.
+
+---
+
+class: clear,middle
+
+## Distribution and link function
+
+
+`\begin{equation}
+\color{red}{f\biggl(y_{ij} \vert \boldsymbol{z}_i, \Theta\biggr)} = \text{exp}[\{\color{red}{y_{ij}}\color{green}{\eta_{ij}} - \color{brown}{g^{-1}}(\color{green}{\eta_{ij}})\}/\phi_j + c(\color{red}{y_{ij}},\phi_j)]
+\end{equation}`
+
+- "the GLM bit"
+- `\(\eta_{ij}\)` is the linear predictor
+- and `\(\mu_{ij} = g^{-1}(\eta_{ij})\)`
+- non-linearity and mean-variance
+
+---
+
+# Distributions and links  
+
+.font70[
+
+| Response          | Distribution | Method  | Link  |
+| ----------------|:------------:|:------- |:------- |
+|Counts  	        | Poisson 	   | VA/LA   |log	    |
+|                 | NB    	     | VA/LA   |log		  |
+|                 | ZIP       	 | LA      |log		  |
+|Binary           | Bernoulli 	 | VA/LA   |probit/logit  |
+|Various    	    | Tweedie 	   | LA/EVA  |log 	  |  
+|Ordinal 	        | Multinomial  | VA      | cumulative probit  | 
+|Normal           | Gaussian     | VA/LA   |identity| 
+|Positive continuous| Gamma     | VA/LA   |log|
+|Non-negative continuous| Exponential | VA/LA   |log| 
+|0-1    | beta    	   | LA/EVA | probit/logit |
+
+]
+
+---
+
+# Algorithm
+
+&lt;img src="NikuEstimation.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+- non-convexity makes it hard to find optimal fit
+- kind of like NMDS
+- strategies for multiple restarts are important
+
+---
+
+class: clear,middle
+
+## When I came in 
+
+&lt;img src="vdVeenQuadratic.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+- making model-based ordination useful for ecologists
+- quadratic responses? maybe not so much
+
+???
+
+- continue the hype from the 80s
+- random row-effect is perhaps more useful
+
+---
+
+# More conceptual advances
+
+.pull-top[
+
+&lt;img src="NikuTraits.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+.pull-bottom[
+
+&lt;img src="van_der_Veen_et_al_2022.png" width="99%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+- spatial is still in development, and more developments to come in the future
+
+???
+
+- might want to stay away from spatial.
+
+---
+
+# Different models in gllvm
+
+- species intercept is ALWAYS included
+- row intercept is optional ("composition")
+- can include an offset (a-priori row-intercept)
+- if we have observed all predictors
+  - in or outside of ordination
+- if we have observed some predictors
+- if we have two sets of predictors (e.g., traits and environment)
+- if we want to add random row-effects for pseudoreplication
+- if we want to do ordination
+
+---
+
+# How to use gllvm
+
+
+```r
+gllvm(y = NULL, X = NULL, TR = NULL, family, num.lv = NULL, num.lv.c = 0, num.RR = 0, 
+formula = NULL, lv.formula = NULL, method = "VA", row.eff = FALSE, studyDesign = NULL, n.init=1, sd.errors = TRUE, quadratic = FALSE, randomB = FALSE, randomX = FALSE, ...)
+```
+
+.font70[
+.pull-left[
+- y: matrix of abundances
+- X: matrix or data.frame of (environmental) variables
+- TR: matrix or data.frame of trait variables
+- family: distribution for responses
+- num.lv/num.lv.c/num.RR: number of unconstrained/concurrent/constrained latent variables
+- a lot of control options
+]
+.pull-right[
+- formula/lv.formula: formula for predictors
+- method: approximation used "VA", "EVA", or “LA”
+- row.eff, studyDesign: row effects
+- n.init: number of random starting points for latent variables
+- sd.errors: should they be calculated?
+- quadratic: for quadratic responses to LVs
+- randomB: random canonical coefficients (with num.lv.c or num.RR)
+- randomX: random-effects for 4th corner
+]
+]
+???
+
+The Main function of the gllvm package is gllvm(), which can be used to fit
+GLLVMs for multivariate data with the most important arguments listed in
+the following:
+
+---
+
+# Function reference
+
+&lt;img src="gllvmFunctionref.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+https://jenniniku.github.io/gllvm/reference/index.html
+
+---
+
+# Page of common errors
+- ordiplot vegan overlaps
+- sd.errors cannot be calculated
+- convergence stuff: maximum iterations, starting values
+
+&lt;b&gt;We try to make it intuitive, but if it isn't post on github for help.&lt;/b&gt;
+
+---
+
+# Some examples
+
+- morphometrics
+- community data
+- microbial community
+
+---
+
+# Example: Wood mouse mandibles
+
+- Morphometric example: predicting size and shape
+- 30 individuals from 3 species (10 each) of wood mice
+- 64 landmarks at border
+
+
+&lt;img src="MouseMandibles.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+article: https://onlinelibrary.wiley.com/doi/full/10.1046/j.1365-2699.2003.00932.x⁠
+
+---
+
+# 1) Start by plotting the data
+
+.center[
+&lt;img src="index_files/figure-html/unnamed-chunk-40-1.png" width="360" /&gt;&lt;img src="index_files/figure-html/unnamed-chunk-40-2.png" width="360" /&gt;
+]
+
+What is the dimensionality of shape?
+
+???
+
+- Red line for readability
+- These coordinates look positive-only..
+
+
+---
+
+# Step 2: format data
+
+- "Apodemus" is a tibble with a list of coordinates
+- Need to reformat into a 2d matrix
+  - Coordinates on the rows
+  - Individuals on the columns
+
+
+```r
+library(Momocs)
+data(apodemus)
+# "Apodemus" is a tibble that holds a list
+# to 3d array first
+dat &lt;- array(unlist(apodemus[[1]]),dim=c(nrow(apodemus[[1]][[1]]),2,length(apodemus[[1]])))
+# then to matrix
+dat&lt;-sapply(seq(dim(dat)[3]), function(x) matrix(unlist(apply(dat[,,x],1,c,simplify = F)),ncol=1))
+```
+
+---
+
+# Step 3: Fitting the GLLVM(s)
+
+
+```r
+library(gllvm)
+model &lt;- gllvm(y = dat, family = "gamma", num.lv = 1, 
+starting.val = "random", n.init = 3)
+model
+```
+.font80[
+
+```
+## Call: 
+## gllvm(y = dat, family = "gamma", num.lv = 1, row.eff = F, n.init = 5, 
+##     starting.val = "random")
+## family: 
+## [1] "gamma"
+## method: 
+## [1] "VA"
+## 
+## log-likelihood:  -6892.962 
+## Residual degrees of freedom:  3750 
+## AIC:  13965.92 
+## AICc:  13970.29 
+## BIC:  14528.71
+```
+]
+
+???
+
+- explain what we see in this print of the model
+
+---
+
+# Step 4: Model-selection
+
+- I fitted models with 1-5 LVs
+- More complex shapes will need more LVs
+
+
+```r
+AIC(mod.one, mod.two, mod.three, mod.four, mod.five)
+```
+
+```
+##            df       AIC
+## mod.one    90 13965.924
+## mod.two   119  6325.122
+## mod.three 147  3547.472
+## mod.four  174  1817.934
+## mod.five  200  3734.409
+```
+
+- We need to find a model that is appropriate, but not too complex
+- Can also use `AICc` or `BIC` instead
+
+???  
+
+- Please use information criteria in moderation
+Conclusion: 4 LVs is "best" &lt;br&gt;
+Next: confirm our model choice
+"best" is determined by the choice of information criterium
+
+---
+
+# Step 5: Residual diagnostics
+
+
+```r
+par(mfrow=c(2,2))
+plot(mod.four,which=1:4)
+```
+
+&lt;img src="index_files/figure-html/mouseresid-1.png" width="720" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Step 5: Residual diagnostics (2)
+
+
+```r
+model &lt;- gllvm(y = dat, num.lv = 4, family = "tweedie", 
+starting.val = "random", n.init = 5)
+```
+&lt;img src="index_files/figure-html/tweed-1.png" width="720" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Step 6: Predicting mandible shape
+
+&lt;img src="index_files/figure-html/mousepred-1.png" width="720" style="display: block; margin: auto;" /&gt;
+
+---
+
+# A bit larger
+
+&lt;img src="index_files/figure-html/mousepred2-1.png" width="720" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Step 6): Genotype correlation
+
+
+```r
+correlations &lt;- getResidualCor(mod.four)
+corrplot::corrplot(correlations, type="lower", order="AOE", diag=T, tl.col=c("brown","black","blue")[as.numeric(as.factor(unlist(apodemus[[2]][,3])))])
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-44-1.png" width="720" /&gt;
+
+---
+
+# Example: Acquatic invertebrates
+
+- Abundances of aquatic invertebrates ("pyrifos" from the vegan R-package)
+- Back-transformed (`(exp(x)-1)/10`)
+- 132 observations of 178 sepecies
+- Treatment (dose), ditch and time (weeks)
+
+&lt;img src="vdBrink1999.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Step 1: Prepare data
+
+
+```r
+library(vegan)
+data("pyrifos")
+pyrifos&lt;-(exp(pyrifos)-1)/10
+ditch &lt;- gl(12, 1, length=132)
+week &lt;- gl(11, 12, labels=c(-4, -1, 0.1, 1, 2, 4, 8, 12, 15, 19, 24))
+dose &lt;- factor(rep(c(0.1, 0, 0, 0.9, 0, 44, 6, 0.1, 44, 0.9, 0, 6), 11))
+X&lt;-data.frame(ditch,week,dose)
+```
+
+???
+
+warning when loading vegan and gllvm at the same time
+
+
+---
+
+# Step 2: Unconstrained ordination
+
+
+```r
+mod&lt;-gllvm(y = pyrifos, num.lv = 2, family = "tweedie")
+```
+
+
+
+```r
+gllvm::ordiplot(mod,s.col=viridis::viridis(length(unique(X$week)))[as.numeric(as.factor(X$week))])
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-49-1.png" width="648" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Step 3: Include week as linear trend
+
+
+```r
+mod.week&lt;-gllvm(y = pyrifos, X = X, formula = ~as.numeric(week), num.lv = 2, family = "tweedie")
+```
+
+
+```r
+gllvm::ordiplot(mod.week,s.col=viridis::viridis(length(unique(X$week)))[as.numeric(as.factor(X$week))])
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-52-1.png" width="648" style="display: block; margin: auto;" /&gt;
+
+???
+
+- any effect not IN the ordination is taken OUT of the ordination
+- also counts for intercepts
+
+---
+
+# Step 4: Looking at other results
+
+
+```r
+coefplot(mod.week)
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-53-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Step 5: Biplot
+
+
+```r
+gllvm::ordiplot(mod.week, biplot =T, predict.region=T, s.col = scales::alpha("gray", 0.5), col.ellips = scales::alpha("gray", 0.5))
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-54-1.png" width="720" style="display: block; margin: auto;" /&gt;
+
+- two quantities
+- do not compare them
+- prediction regions
+
+---
+
+# Step 6: Compare models
+
+
+```r
+anova(mod, mod.week)
+```
+
+```
+## Warning in anova.gllvm(mod, mod.week): This test was not designed for tests with a df.diff larger than 20 so the P-value should be treated as approximate.
+```
+
+```
+## Model  1 :  y ~ NULL 
+## Model  2 :  ~ as.numeric(week)
+```
+
+```
+##   Resid.Df       D Df.diff P.value
+## 1    22785   0.000       0        
+## 2    22607 995.914     178       0
+```
+
+```r
+AICc(mod, mod.time)
+```
+
+```
+## [1] 47977.59 47363.24
+```
+
+---
+
+# Alternatively, as random row-effect
+
+(think of "ditch" as time)
+
+```r
+mod&lt;-gllvm(y = pyrifos, num.lv = 2, family = "tweedie", 
+           row.eff=~corAR1(1|week))
+```
+
+- requires regular time intervals (which we here do not have)
+
+---
+
+# Example: Skabbholmen
+
+- cover classes of 70 species at 65 sites
+- two predictors: elevation and year
+- replication over transects
+
+
+&lt;img src="Cramer1987.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Step 1: Prepare data
+
+
+```r
+data("Skabbholmen")
+Skabbholmen$X$Year &lt;- Skabbholmen$X$Year - min(Skabbholmen$X$Year)
+Skabbholmen$X$Elevation &lt;- scale(Skabbholmen$X$Elevation)
+```
+
+- Scaling is important
+
+---
+
+# Step 2: Unconstrained ordination
+
+
+```r
+model.UO &lt;- gllvm(y = Skabbholmen$Y, 
+studyDesign = Skabbholmen$X, num.lv = 2, 
+row.eff = ~(1|transectID), family = "ordinal", 
+zeta.struc = "common", n.init = 3, trace = T)
+```
+
+
+---
+
+# Step 3: Constrained ordination
+
+
+```r
+model.CO &lt;- gllvm(y = Skabbholmen$Y, X = Skabbholmen$X, 
+num.RR = 2, lv.formula = ~Elevation+Year, 
+row.eff = ~(1|transectID), family = "ordinal", 
+zeta.struc = "common", n.init = 3, trace = T)
+```
+
+
+---
+
+# Step 4: Concurrent ordination
+
+```r
+model.CN &lt;- gllvm(y = Skabbholmen$Y, X = Skabbholmen$X, 
+num.lv.c = 2, lv.formula = ~Elevation+Year, 
+row.eff = ~(1|transectID), family = "ordinal", 
+zeta.struc = "common", n.init = 3, trace = T)
+```
+
+
+---
+
+# Step 5: Comparing ordinations
+
+.font70[
+
+```r
+anova(model.UO, model.CN)
+```
+
+```
+## Model  1 :  y ~ NULL 
+## Model  2 :
+```
+
+```
+##   Resid.Df        D Df.diff P.value
+## 1     8360   0.0000       0        
+## 2     8357 361.2274       3       0
+```
+
+
+
+```r
+anova(model.CO, model.CN)
+```
+
+```
+## Model  1 :   
+## Model  2 :
+```
+
+```
+##   Resid.Df       D Df.diff P.value
+## 1     8359   0.000       0        
+## 2     8357 281.529       2       0
+```
+]
+
+---
+
+# Procrustes comparison
+
+.font60[
+
+```r
+vegan::procrustes(getLV(model.UO),getLV(model.CO),symmetric=T)
+```
+
+```
+## 
+## Call:
+## vegan::procrustes(X = getLV(model.UO), Y = getLV(model.CO), symmetric = T) 
+## 
+## Procrustes sum of squares:
+## 0.9329
+```
+
+```r
+vegan::procrustes(getLV(model.UO),getLV(model.CN),symmetric=T)
+```
+
+```
+## 
+## Call:
+## vegan::procrustes(X = getLV(model.UO), Y = getLV(model.CN), symmetric = T) 
+## 
+## Procrustes sum of squares:
+## 0.4322
+```
+
+```r
+vegan::procrustes(getLV(model.CO),getLV(model.CN),symmetric=T)
+```
+
+```
+## 
+## Call:
+## vegan::procrustes(X = getLV(model.CO), Y = getLV(model.CN), symmetric = T) 
+## 
+## Procrustes sum of squares:
+## 0.8041
+```
+]
+
+---
+
+# Step 6: Examine results
+
+.pull-left[
+
+```r
+gllvm::ordiplot(model.CN,biplot=T)
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-70-1.png" width="504" /&gt;
+]
+
+.pull-right[
+
+```r
+coefplot(model.CN)
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-71-1.png" width="504" /&gt;
+]
+
+???
+Strategies for a nicer ordination 
+
+- check convergence
+- change species order
+- randomB
+- change model structure
+- change plot; e.g. arrows
+
+
+---
+
+# Step 6: Examine results
+
+.font60[
+
+```r
+summary(model.CN, rotate=T)
+```
+
+```
+## 
+## Call:
+## gllvm(y = Skabbholmen$Y, X = Skabbholmen$X, family = "ordinal", 
+##     num.lv.c = 2, lv.formula = ~Elevation + Year, row.eff = ~(1 | 
+##         transectID), zeta.struc = "common", n.init = 3, trace = T)
+## 
+## Family:  ordinal 
+## 
+## AIC:  4635.912 AICc:  4646.618 BIC:  6124.683 LL:  -2107 df:  211 
+## 
+## Informed LVs:  2 
+## Constrained LVs:  0 
+## Unconstrained LVs:  0 
+## Residual standard deviation of LVs:  0.0063 0.4883 
+## 
+## Formula:  ~ 1 
+## LV formula:  ~Elevation + Year 
+## 
+## Coefficients LV predictors:
+##                Estimate Std. Error z value Pr(&gt;|z|)    
+## Elevation(LV1)  1.38768    0.23830   5.823 5.77e-09 ***
+## Year(LV1)       0.03982    0.01408   2.828  0.00469 ** 
+## Elevation(LV2)  0.01596    0.17205   0.093  0.92609    
+## Year(LV2)       0.01624    0.01855   0.875  0.38132    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+
+---
+
+# We could also fit a quadratic model
+
+
+```r
+model.CN &lt;- gllvm(y = Skabbholmen$Y, X = Skabbholmen$X, 
+num.lv.c = 2, lv.formula = ~Elevation+Year, 
+row.eff = ~(1|transectID), family = "ordinal", 
+zeta.struc = "common", n.init = 3, trace = T, quadratic="LV")
+```
+
+---
+
+# Example: microbial community
+
+- 56 OTUs (soil sample sites) for 985 bacteria species
+- 8 regions from 3 countries
+
+
+```r
+data("microbialdata")
+Ysoil &lt;- microbialdata$Y
+Xenv &lt;- scale(microbialdata$Xenv[,1:3])
+sDesign&lt;-data.frame(Site=microbialdata$Xenv$Site)
+# for ordiplot later
+ph &lt;- microbialdata$Xenv$pH
+rbPal &lt;- colorRampPalette(c('mediumspringgreen', 'blue'))
+Colorsph &lt;- rbPal(20)[as.numeric(cut(ph, breaks = 20))]
+pchr = NULL
+pchr[microbialdata$Xenv$Region == "Kil"] = 1
+pchr[microbialdata$Xenv$Region == "NyA"] = 2
+pchr[microbialdata$Xenv$Region == "Aus"] = 3
+```
+
+see vignette: https://jenniniku.github.io/gllvm/articles/vignette2.html
+---
+
+# Compositionality
+
+- Two strategies for dealing with compositional data
+- 1) offset (a-priori known row-effect):
+
+`\begin{aligned}
+\mu_{ij} &amp;= \text{exp}\{\beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\gamma}_j + \text{log}(t_i)\} \\
+\frac{\mu_{ij}}{t_i} &amp;= \text{exp}\{\beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\gamma}_j\}
+\end{aligned}`
+
+- 2) OTU-specific intercept:
+
+`\begin{equation}
+\mu_{ij} = \text{exp}\{\alpha_i + \beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\gamma}_j\}
+\end{equation}`
+
+- or both
+
+---
+
+class:clear,middle
+
+## Some references
+
+&lt;img src="offset.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="offset2.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+see also: https://github.com/JenniNiku/gllvm/issues/23
+
+---
+
+# Step 1: Fit model
+
+
+```r
+ftNULL &lt;- gllvm(Ysoil, studyDesign = sDesign, family = "negative.binomial", row.eff = ~(1|Site), num.lv = 2, sd.errors = FALSE, method = "EVA")
+```
+&lt;img src="index_files/figure-html/unnamed-chunk-78-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+???
+- EVA is a bit faster
+- SE off
+
+---
+
+# Step 2: Fit concurrent ordination
+
+
+```r
+ftCN &lt;- gllvm(Ysoil, X=Xenv, studyDesign = sDesign, family = "negative.binomial", row.eff = ~(1|Site), num.lv.c = 2, sd.errors = FALSE, method = "EVA")
+```
+&lt;img src="index_files/figure-html/unnamed-chunk-80-1.png" width="504" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Step 3: Uncertainties
+
+
+```r
+sdErr &lt;- se(ftCN) # This takes a long time for large datasets
+ftCN$sd &lt;- sdErr$sd
+ftCN$Hess &lt;- sdErr$Hess
+confint(ftCN,"LvXcoef")
+```
+
+
+```
+##                    cilow      ciup
+## X.SOM.LV.1   -0.65814608 0.4562491
+## X.pH.LV.1    -1.58875105 1.6210584
+## X.Phosp.LV.1 -0.72495955 0.6661855
+## X.SOM.LV.2   -0.52427578 0.3352260
+## X.pH.LV.2    -2.93847368 1.8078546
+## X.Phosp.LV.2 -0.07532233 0.1236164
+```
+
+---
+
+# Step 4: Variation explained
+
+
+```r
+1 - getResidualCov(ftCN)$trace/getResidualCov(ftNULL)$trace
+```
+
+```
+## [1] 0.6161572
+```
+
+alternatively:
+
+
+```r
+partR2(ftCN) # function from van der Veen et al. 2022
+```
+
+```
+## R^2 for latent variables: 0.0501 
+##  
+## Partial R^2 for predictors and all LVs: 
+##   X.SOM    X.pH X.Phosp 
+##  0.0213  0.0409  0.0024
+```
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="cols_macro.js"></script>
+<script>var slideshow = remark.create({
+"slideNumberFormat": "<div class=\"progress-bar-container\">\n</div>\n</div>\n<div class=\"progress-bar\" style=\"width: calc(%current% / %total% * 100%);\">\n"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
