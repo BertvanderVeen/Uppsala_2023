@@ -507,7 +507,7 @@ class:clear,middle
  - Solution can be re-rotated afterwards (see e.g., the GPArotation package)
   - To certain species, to predictors, or by some criterium
 
-```{r, fig.align="center", out.width = "80%", echo=F}
+```{r, fig.align="center", out.width = "40%", echo=F}
 knitr::include_graphics("rotation.png")
 ```
 
@@ -515,7 +515,7 @@ knitr::include_graphics("rotation.png")
   
 # Different packages
 
-I will briefly go through the different model-based ordination packages
+I will briefly go through the different model-based ordination packages<br>
 NB: Quickly expanding field
 
 ???
@@ -980,8 +980,8 @@ class: clear,middle
 \end{equation}
 
 - "the GLM bit"
-- $\eta_{ij}$ is the linear predictor
-- and $\mu_{ij} = g^{-1}(\eta_{ij})$
+- $\color{green}{\eta_{ij}}$ is the linear predictor
+- and $\mu_{ij} = \color{brown}{g^{-1}}(\eta_{ij})$
 - non-linearity and mean-variance
 
 ---
