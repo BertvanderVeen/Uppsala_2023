@@ -1152,11 +1152,11 @@ https://jenniniku.github.io/gllvm/reference/index.html
 knitr::include_graphics("MouseMandibles.png")
 ```
 
-article: https://onlinelibrary.wiley.com/doi/full/10.1046/j.1365-2699.2003.00932.x⁠
+article: https://doi.org/10.1046/j.1365-2699.2003.00932.x
 
 ---
 
-# 1) Start by plotting the data
+# Step 1: Start by plotting the data
 
 .center[
 ```{r, echo=F, eval=T, fig.height=5,fig.width=5}
@@ -1204,9 +1204,9 @@ library(Momocs)
 data(apodemus)
 # "Apodemus" is a tibble that holds a list
 # to 3d array first
-dat <- array(unlist(apodemus[[1]]),dim=c(nrow(apodemus[[1]][[1]]),2,length(apodemus[[1]])))
+dat3d <- array(unlist(apodemus[[1]]),dim=c(nrow(apodemus[[1]][[1]]),2,length(apodemus[[1]])))
 # then to matrix
-dat<-sapply(seq(dim(dat)[3]), function(x) matrix(unlist(apply(dat[,,x],1,c,simplify = F)),ncol=1))
+dat <- sapply(seq(dim(dat3d)[3]), function(x) matrix(unlist(apply(dat3d[,,x],1,c,simplify = F)),ncol=1))
 ```
 
 ---
@@ -1293,8 +1293,8 @@ plot(model,which=2)
 # save(mods,file="mice.mods.RData")
 
 #to get range for plot
-eta<-predict(mods[[4]],type="response")
-coordPred<-array(unlist(sapply(seq(ncol(dat)), function(x) matrix((eta)[,x],ncol=2,byrow=T),simplify = F)),dim=c(nrow(dat)/2,2,ncol(dat)))
+eta <- predict(mods[[4]],type="response")
+coordPred <- array(unlist(sapply(seq(ncol(dat)), function(x) matrix((eta)[,x],ncol=2,byrow=T),simplify = F)),dim=c(nrow(dat)/2,2,ncol(dat)))
 
 par(mfrow=c(2,3))
 
