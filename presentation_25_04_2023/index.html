@@ -810,7 +810,7 @@ class: middle,clear,center
 \eta_{ij} = \beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\gamma}_j
 \end{equation}`
 
-with `\(\boldsymbol{z_i} = \boldsymbol{B}^\top\boldsymbol{x}_i + \boldsymbol{\epsilon}_i\)`
+with `\(\boldsymbol{z}_i = \boldsymbol{B}^\top\boldsymbol{x}_i + \boldsymbol{\epsilon}_i\)`
 
 - can be extended with unimodal model
 
@@ -959,8 +959,8 @@ A matrix relatedness of individuals?!--&gt;
 
 `\begin{aligned}
 \eta_{ij} &amp;= \beta_{0j} + \color{red}{\boldsymbol{z}_i}^\top\color{brown}{\boldsymbol{\Sigma}}\color{blue}{\boldsymbol{\gamma}_j} \\
-\color{red}{\boldsymbol{z}_i} &amp;= \boldsymbol{B}^\top\boldsymbol{x}_i + \boldsymbol{b}^\top\boldsymbol{u}_j + \boldsymbol{\epsilon} \\
-\color{blue}{\boldsymbol{\gamma}_j} &amp;= \boldsymbol{\omega}^\top\boldsymbol{T}_j + \boldsymbol{w}^\top\boldsymbol{\lambda}_i + \boldsymbol{\epsilon}
+\color{red}{\boldsymbol{z}_i} &amp;= \boldsymbol{B}^\top\boldsymbol{x}_i + \boldsymbol{b}^\top\boldsymbol{u}_j + \boldsymbol{\epsilon}_i \\
+\color{blue}{\boldsymbol{\gamma}_j} &amp;= \boldsymbol{\omega}^\top\boldsymbol{T}_j + \boldsymbol{w}^\top\boldsymbol{\lambda}_i + \boldsymbol{\varepsilon}_j
 \end{aligned}`
 
 - `\(\color{brown}{\Sigma}\)` are a type of singular values under correct standardization
