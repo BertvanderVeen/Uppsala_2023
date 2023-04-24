@@ -3,7 +3,7 @@ title: "Statistical frontiers in ecology"
 subtitle: "Hierarchical ordination, JSDMs, and all that."
 author:
   - Bert van der Veen
-  - <br>
+date: " .pull-left[![](CBD_logo.png){width=1in}] .pull-right[![](ntnu.png){width=1in}] "
 header-includes:
     - \usepackage{mathtools}
     - \usepackage{tikz}
@@ -96,6 +96,32 @@ knitr::opts_chunk$set(echo = FALSE, message=F, warning=F, fig.retina=3)
 - Part III: Model-based ordination
 - Part IV: My vision for the (near?) future
 
+???
+
+- I Focus on a lot of stuff from others, to give a good overview of the methods we build on with new developments
+- In the end some more of my stuff
+
+
+---
+
+class:clear,center,middle
+
+```{r, echo=F, out.width = "30%", fig.show="hold"}
+knitr::include_graphics("jenni2.jpeg")
+knitr::include_graphics("hui.jpg")
+knitr::include_graphics("pekka.jpg")
+knitr::include_graphics("sara.jpeg")
+knitr::include_graphics("warton.jpg")
+knitr::include_graphics("bob.jpg")
+```
+
+Jenni Niku (JYU), Francis Hui (ANU), Pekka Korhonen (JYU), Sara Taskinen (JYU), David Warton (UNSW), Bob O'Hara (NTNU)
+
+???
+
+many people are involved, here are some
+
+
 ---
 
 class:center
@@ -132,15 +158,17 @@ corrplot::corrplot(getResidualCor(mod),type = "lower",order = "AOE")
 ---
 
 # Use of ordination
+ 
+ - One of the most used methods of multivariate analysis in ecology (but definitely not the only one)
 - To arrange species and samples in a low-dimensional space
   - or any column and row quantity really
 - Summarize data
 - In order to find underlying structures (gradients - process based)
-- Analyze community datasets of frequencies
 
 --
 
-## One of the most used methods of multivariate analysis in ecology (but definitely not the only one)
+ ## To Analyze multivariate (non-normal) data
+
 
 ---
 
@@ -161,14 +189,14 @@ knitr::include_graphics("test.jpg")
 # A brief history of ordination
 .pull-left[
 
-```{r,out.width="70%",out.height="99%", fig.align="center", echo=F}
+```{r,out.width="80%",out.height="99%", fig.align="center", echo=F}
 knitr::include_graphics("MP_timeline_17-04-2023.png")
 ```
 
 ]
 
 .pull-right[
-```{r,out.width="70%",out.height="99%", fig.align="center", echo=F}
+```{r,out.width="80%",out.height="99%", fig.align="center", echo=F}
 knitr::include_graphics("J_Birks_timeline.png")
 ```
 ]
@@ -220,8 +248,9 @@ data <- tribble( ~start_date, ~event, ~displ,
                 ymd("1988-01-01"), "Theory of \n gradient analysis", -0.2,
                 ymd("1990-01-01"), "I was born", 1,
                 ymd("1999-01-01"), "PRC", 0.2,
-                ymd("1999-01-01"), "db-RDA", 0.4,
+                ymd("1999-01-01"), "db-RDA", 0.5,
                 ymd("1999-01-01"), "Probabilistic PCA", 0.6,
+                ymd("2001-01-01"), "vegan", -0.6,
                 ymd("2005-01-01"), "Nothing?", -0.1,
                 ymd("2010-01-01"), "Nothing??", -0.5,
                 ymd("2020-01-01"), "Still nothing?!", -0.9)
@@ -281,10 +310,15 @@ make a point that some of these methods have been out for a long time (constrain
 
 ---
 
-# Then, CA and LDA were developed
+# Then, CA was developed
 ```{r, fig.width=15}
 set_col(timeline,1:3,"white","black")
 ```
+
+???
+
+- important because precursor to many methods
+- also still what we work on now
 
 ---
 
@@ -293,6 +327,10 @@ set_col(timeline,1:3,"white","black")
 ```{r, fig.width=15}
 set_col(timeline,1,"white","black")
 ```
+
+???
+
+- first model-based ordination method
 
 ---
 
@@ -327,18 +365,10 @@ knitr::include_graphics("Whittaker_1956_quadratic.png")
 
 ---
 
-# Distance-based ordination
-
-```{r, fig.width=15}
-set_col(timeline,1:3,"white","black")
-```
-
-
----
-
 # Ordination became popular
 
 ```{r, fig.width=15}
+timeline <- set_col(timeline,1:3,"white","black")
 set_col(timeline,1:4,"transparent","red")
 timeline <- set_col(timeline,1:4,"red","grey")
 ```
@@ -360,8 +390,13 @@ timeline <- set_col(timeline,1,"red","grey")
 ```
 
 - DCA was developed
-- DECORANA
-- TWINSPAN
+- MIMIC
+
+???
+
+- DCA is still a competitor for us
+- MIMIC was reduced rankr egression + factor analysis of covariance matrix
+  - important, because again precusor model-basde methods
 
 ---
 
@@ -373,8 +408,7 @@ set_col(timeline,1,"white","black")
 timeline <- set_col(timeline,1:2,"red","grey")
 ```
 
-- The unmodal model continued
-- Canoco!
+- The unimodal model continued
 
 ???
 
@@ -413,7 +447,6 @@ timeline<-set_col(timeline,1,"red","grey")
 
 - The unimodal model
 - Development of CCA
-- Twinspan, Canoco, Decorana!
 
 ???
 
@@ -437,6 +470,37 @@ knitr::include_graphics("Minchin_1987.png")
 - motivated by process-based thinking (not unimodal model)
 - but not process-based/worse interpretation!
 - I think a mistake.
+
+---
+
+class: clear,center
+
+## Results Minchin dataset
+
+```{r, echo=F, message=F, warning=F, out.width="65%", out.height="33%",fig.show="hold"}
+library(gllvm)
+library(vegan)
+# Download the minchin dataset
+minchin <- read.csv("https://raw.githubusercontent.com/BertvanderVeen/Examples/master/Minchin87_2b_counts.csv") # Data frmo minchin 1987
+# All missing values are zeros
+minchin[is.na(minchin)] <- 0
+minchin<-minchin[,-1]
+# We will first do some classical ordination methods
+# Correspondence analysis
+CA_minchin <- cca(minchin)
+# Detrended CA
+DCA_minchin <- decorana(minchin)
+logDCA_minchin <- decorana(log1p(minchin))
+
+# NMDS
+NMDS_minchin <- metaMDS(minchin, k = 2, trace = F)
+par(mfrow=c(2,2))
+# Let's have a look at the results
+plot(scores(CA_minchin,display="sites"), main="CA") # arch effect
+plot(scores(DCA_minchin)[,1:2], main="DCA") # This has the tongue effect
+plot(scores(logDCA_minchin, display="sites"), main="log-DCA") # suggestion from paper CTB
+plot(NMDS_minchin$points, main="NMDS") # This looks pretty OK!
+```
 
 ---
 
@@ -468,10 +532,13 @@ timeline<-set_col(timeline,1,"gold","transparent")
 # db-RDA & PRC came a bit later
 
 ```{r, fig.width=15}
-set_col(timeline,1:3,"white","black")
+timeline <- set_col(timeline,1:3,"white","black")
+set_col(timeline,1,"transparent","red")
+timeline <- set_col(timeline,1,"red","gray")
 ```
 
 - Probabilistic PCA
+- vegan!
 
 ???
 
@@ -548,8 +615,9 @@ data <- tribble( ~start_date, ~event, ~displ,
                 ymd("2012-01-01"), "Mvabund", -1.2,
                 ymd("2013-01-01"), "INLA", -0.1,
                 ymd("2013-01-01"), "VAE", -0.3,
-                ymd("2010-01-01"), "JSDM", 0.2,
+                ymd("2010-01-01"), "JSDM(1)", 0.2,
                 ymd("2014-01-01"), "RCIM", 0.8,
+                ymd("2015-01-01"), "JSDM(2)", -0.2,
                 ymd("2015-01-01"), "Model-based thinking", -0.5,
                 ymd("2015-01-01"), "Model-based unconstrained ordination", 0.6,
                 ymd("2015-01-01"), "Unconstrained ordination with MCMC", -1,
@@ -746,36 +814,13 @@ knitr::include_graphics("8-P1082654.jpg")
 - but more focused on ecological questions
 - cajo has been my role model in some of this, both dutch :)
 
----
-
-class:clear,middle
-
-## So why is everyone still using old methods?
-
-- Old is not bad
-- Suits needs
-- Lack of resources for new methods
-- Challenging to apply new methods
-- Accessibility
-- Familiarity bias
-
-A lot of my motivation comes from this
-
-
-???
-
-- Old is not bad but these methods are
-- Think that the methods suit needs
-- Cannot find resources
-- Cannot find education
-- Do not know of software/methods
-- I don't know (hair pulling)
 
 ---
 
 # Joint Species Distribution Modeling
 
 - First suggested by Ovaskainen et al. 2010
+- Named by Pollock et al. 2014
 
 .pull-left[
 ```{r,out.width="80%",out.height="80%", fig.align="center", echo=F, fig.cap="Figures from Ovaskainen et al. 2017"}
@@ -805,7 +850,7 @@ knitr::include_graphics("Ovaskainen_et_al_2017_2.png")
 - So we model that:
 
 \begin{equation}
-g(\text{E}(y_{ij}|\boldsymbol{X}_i)) = \beta_{0j} + \boldsymbol{X}_i^\top \boldsymbol{\beta}_j + \epsilon_{ij}, \qquad \boldsymbol{\epsilon}_i \sim \mathcal{N}(0,\Sigma)
+g(\text{E}(y_{ij}|\boldsymbol{X}_i)) = \beta_{0j} + \boldsymbol{X}_i^\top \boldsymbol{\beta}_j + \color{red}{\epsilon_{ij}}, \qquad \color{red}{\boldsymbol{\epsilon}_i} \sim \mathcal{N}(0,\Sigma)
 \end{equation}
 
 - Can be fit using standard mixed-effects modeling software.
@@ -817,27 +862,18 @@ g(\text{E}(y_{ij}|\boldsymbol{X}_i)) = \beta_{0j} + \boldsymbol{X}_i^\top \bolds
 Otso/Pollock
 - process-based thinking but different angle? Correlation.
 - Ordination went on hold a bit after that, but enter..JSDM/biotic interactions!
+- if before we thought of these as separate glms, they are now connected
 
 ---
 
 # "Fun" ecological inference
 
-```{r,out.width="60%",out.height="60%", fig.align="center", echo=F, fig.cap="Warton et al. 2015 Alpine plants"}
+```{r,out.width="55%", fig.align="center", echo=F, fig.cap="Warton et al. 2015 Alpine plants"}
 knitr::include_graphics("Warton_2015_alpineplants.jpg")
 ```
 
 - but, $\Sigma$ has $p(p+1)/2$ parameters (which increases quadratically with # species)
 - JSDMs usually converge horribly and are slow to fit
-
----
-
-class:clear,middle,center
-
-## Since then
-
-```{r,out.width="90%",out.height="90%", fig.align="center", echo=F}
-knitr::include_graphics("Pichler_Hartig_2021.png")
-```
 
 ---
 
@@ -847,8 +883,8 @@ class: clear
 
 - GLLVM for short
 - Add "factor analytic" structure to $\Sigma$
-- $\epsilon_{ij} = \boldsymbol{u}_i^\top \boldsymbol{\theta}_j$
-  - i.e. $\boldsymbol{\epsilon}_i \sim \mathcal{N}(0,\boldsymbol{\theta}_j\boldsymbol{\theta}_j^\top)$
+- $\color{red}{\epsilon_{ij}} = \boldsymbol{u}_i^\top \boldsymbol{\theta}_j$
+  - i.e. $\color{red}{\boldsymbol{\epsilon}_i} \sim \mathcal{N}(0,\boldsymbol{\theta}_j\boldsymbol{\theta}_j^\top)$
 - Faster and fewer parameters:
   - Number of parameter doesn't grow so fast
 
@@ -868,7 +904,7 @@ class: clear
 
 ???
 
-- I.e., ordination is diverging from JSDMs again (JSDM != GLLVM)
+- more formal way of doing ordination
 - GLLVMs are for FA what GLMs are for LM
 
 ???
@@ -878,7 +914,6 @@ class: clear
 - it is a next step in the evolution of ordination
 - Ignores 100 years ordination method developments
 - e.g., a linear model!!, we see that next
-
 
 
 ---
@@ -898,6 +933,19 @@ knitr::include_graphics("REord_Jackson_2011.png")
 - Eek this doesn't work - enter GLLVM
 - Gauch et al. 1974 already connected ordination with SDM, but this has long since forgotten
 - Not until 2015 was this better recognized?
+
+---
+class:clear,middle,center
+
+## Since then
+
+```{r,out.width="90%",out.height="90%", fig.align="center", echo=F}
+knitr::include_graphics("Pichler_Hartig_2021.png")
+```
+
+???
+
+- ordination is diverging from JSDMs again (JSDM != GLLVM)
 
 ---
 
@@ -949,20 +997,116 @@ knitr::include_graphics("robertsen.png")
 knitr::include_graphics("Jupke.png")
 ```
 
---
-
-My opinion: Yes!
-
-
 ???
 - Compared model-based with NMDS & t-SNE
 - Distance-based outperformed model-based (Boral, REO)
 - A fued was born?
 - My opion: the way that Roberts did his analysis was weird, and does not give an accurate picture
-- I think generally model-based outperforms distance-based.
 
 ---
 
+# Return of the unimodal model
+
+```{r,out.width="70%",out.height="70%", fig.align="center", echo=F}
+knitr::include_graphics("vdVeenQuadratic.png")
+```
+
+- Species responses are not linear
+- So we created an unimodal model
+
+\begin{equation}
+\eta_{ij} = \beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\gamma}_j \color{red}{- \boldsymbol{z}_i\boldsymbol{D}_k\boldsymbol{z}_i}
+\end{equation}
+
+???
+
+- first thing in PhD: update Cajo his work from 80s
+
+
+---
+
+class:clear,middle,center
+
+## Recall: Results Minchin dataset
+
+```{r, echo=F, message=F, warning=F, out.width="65%", out.height="33%",fig.show="hold"}
+library(gllvm)
+library(vegan)
+# Download the minchin dataset
+minchin <- read.csv("https://raw.githubusercontent.com/BertvanderVeen/Examples/master/Minchin87_2b_counts.csv") # Data frmo minchin 1987
+# All missing values are zeros
+minchin[is.na(minchin)] <- 0
+minchin<-minchin[,-1]
+# We will first do some classical ordination methods
+# Correspondence analysis
+CA_minchin <- cca(minchin)
+# Detrended CA
+DCA_minchin <- decorana(minchin)
+logDCA_minchin <- decorana(log1p(minchin))
+
+# NMDS
+NMDS_minchin <- metaMDS(minchin, k = 2, trace = F)
+par(mfrow=c(2,2))
+# Let's have a look at the results
+plot(scores(CA_minchin,display="sites"), main="CA") # arch effect
+plot(scores(DCA_minchin)[,1:2], main="DCA") # This has the tongue effect
+plot(scores(logDCA_minchin, display="sites"), main="log-DCA") # suggestion from paper CTB
+plot(NMDS_minchin$points, main="NMDS") # This looks pretty OK!
+```
+
+
+---
+
+class:clear,middle,center
+
+## Results Minchin dataset: gllvm
+
+```{r,out.width="40%",out.height="49%", echo=F}
+#mod <- gllvm(minchin,family="negative.binomial",num.lv=2, row.eff="random",starting.val="res", n.init=3, jitter.var=0.2, trace=T, method="EVA", sd.errors = F)
+#save(mod,file="/home/bertv/Dropbox/Uppsala/presentation_25_04_2023/linmodMinchin.RData")
+load("/home/bertv/Dropbox/Uppsala/presentation_25_04_2023/linmodMinchin.RData")
+plot(getLV(mod)%*%diag(mod$params$sigma.lv), xlab="LV1", ylab="LV2", main="linear response GLLVM")
+
+#It needs to be with NB!
+#ok this works best:
+#mod3 <- gllvm(minchin,family="poisson",num.lv=2, trace=T, jitter.var=.2,sd.errors=F,n.init=3, quadratic=T)
+#save(mod3,file="/home/bertv/Dropbox/Uppsala/presentation_25_04_2023/quadmodMinchin.RData")
+load("/home/bertv/Dropbox/Uppsala/presentation_25_04_2023/quadmodMinchin.RData")
+plot(getLV(mod3)%*%diag(mod3$params$sigma.lv), xlab="LV1", ylab="LV2", main="quadratic response GLLVM")
+```
+
+???
+- true model was neither of these
+- linear gllvm different dist and row-effects
+- i.e., the story on response curves was meh
+- just poor methods were applied
+
+---
+
+class:clear,center,middle
+
+## "True" unimodal responses
+
+```{r,out.width="100%",out.height="70%", fig.align="center", echo=F}
+knitr::include_graphics("mee313595-fig-0003-m.jpg")
+```
+
+
+---
+
+
+class:clear,middle,center
+
+I think: <br>
+1) Model-based methods generally outperform distance-based methods <br>
+2) Model-based methods are conceptually superior <br>
+3) Model-based methods should be preferred
+
+???
+
+though lvm + distance is kind of interesting.
+
+---
 
 class: middle,clear,center
 
@@ -1066,9 +1210,20 @@ Allows us to do all kinds of fun things
 
 ---
 
+# Classical ordination $\approx$ model-based 
+
+- PCA $\approx$ Gaussian linear GLLVM
+- CA $\approx$ Poisson/Bernoulli/Gamma linear GLLVM
+- CCA $\approx$ constrained GLLVM
+
+<b>But model-based ordination is much more flexible than that </b>
+
+---
+
 class:clear,center,middle
 
 ## .font70[Multivariate data arises in many ecological disciplines]
+
 
 .pull-left[
 ```{r echo=F, out.width="60%", fig.align="center", fig.cap="Communities"}
@@ -1088,7 +1243,7 @@ knitr:::include_graphics("trend.png")
 ]
 
 .pull-right[
-```{r echo=F, out.width="50%", fig.align="center", fig.cap="Individual differences"}
+```{r echo=F, out.width="45%", fig.align="center", fig.cap="Individual differences"}
 knitr:::include_graphics("squid.jpg")
 ```
 ]
@@ -1140,13 +1295,15 @@ knitr:::include_graphics("quadriplot.jpg")
 
 - in form much more similar to classical ordination
 - but with all model-based jazz
-- $\Sigma$ are a type of singular values under correct standardization
 
 \begin{aligned}
-\eta_{ij} &= \beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\Sigma}\boldsymbol{\gamma}_j \\
-\boldsymbol{z}_i &= \boldsymbol{B}^\top\boldsymbol{x}_i + \boldsymbol{b}^\top\boldsymbol{u}_j + \boldsymbol{\epsilon} \\
-\boldsymbol{\gamma}_j &= \boldsymbol{\omega}^\top\boldsymbol{T}_j + \boldsymbol{w}^\top\boldsymbol{\lambda}_i + \boldsymbol{\epsilon}
+\eta_{ij} &= \beta_{0j} + \color{red}{\boldsymbol{z}_i}^\top\color{brown}{\boldsymbol{\Sigma}}\color{blue}{\boldsymbol{\gamma}_j} \\
+\color{red}{\boldsymbol{z}_i} &= \boldsymbol{B}^\top\boldsymbol{x}_i + \boldsymbol{b}^\top\boldsymbol{u}_j + \boldsymbol{\epsilon} \\
+\color{blue}{\boldsymbol{\gamma}_j} &= \boldsymbol{\omega}^\top\boldsymbol{T}_j + \boldsymbol{w}^\top\boldsymbol{\lambda}_i + \boldsymbol{\epsilon}
 \end{aligned}
+
+- $\color{brown}{\Sigma}$ are a type of singular values under correct standardization
+
 
 --
 
@@ -1170,7 +1327,6 @@ Explain equation maybe color parts - we have lmms for the ordination axes & spec
 ```{r,out.width="70%",out.height="70%", fig.align="center", echo=F, warning=FALSE, fig.cap="HO results from Ants dataset (Gibb et al. 2015)"}
 knitr::include_graphics("Ohara_vanderVeen_2023_ants.png")
 ```
-
 
 ---
 
@@ -1239,7 +1395,7 @@ ordinate(y ~ pred1 + (1|ID),
          cols ~ pred2 + (pred3|treatment),
          rows ~ pred4, 
          colsCov = P, rowsCov = expCor(S),
-         dim = 2)
+         dim = 2, family = ...)
 ```
 
 --
@@ -1263,17 +1419,7 @@ ordinate(y ~ pred1 + (1|ID),
 
 ---
 
-# Conclusion
-
-- A fourth corner model, MGLM, SEM, JSDM, ordination
-
-```{r echo=F, out.width="40%", fig.align="center"}
-knitr:::include_graphics("rule.jpg")
-```
-
----
-
-# Conclusion (2)
+# Conclusion 
 
 - A fourth corner model, MGLM, SEM, JSDM, ordination
 - Incorporate different types of data
@@ -1281,13 +1427,29 @@ knitr:::include_graphics("rule.jpg")
 - A framework for multivariate multilevel analysis in ecology
 - Bonus: can make fancy bi/tri/quadri-plots
 
+```{r echo=F, out.width="40%", fig.align="center"}
+knitr:::include_graphics("rule.jpg")
+```
+
+
 ---
 
-class:clear,middle
+class:clear,middle,center
 
-- Ordination is so much more than "a descriptive method"
-- It is a framework for complex (reduced rank) multivariate statistical modeling
+Ordination is so <b>much</b> more than "a descriptive method"<br>
+It is a framework for complex (reduced rank) multivariate statistical modeling
 
 ```{r echo=F, out.width="50%", fig.align="center", fig.cap = "Jyväskylä"}
 knitr:::include_graphics("Jyvaskyla.jpg")
 ```
+
+---
+
+# Tomorrow: model-based ordination in R
+
+```{r echo=F, out.width="50%", fig.align="center", fig.cap = "Jyväskylä"}
+knitr:::include_graphics("workshop.png")
+```
+
+
+
