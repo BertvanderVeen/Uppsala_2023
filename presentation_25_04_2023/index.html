@@ -265,7 +265,7 @@ make a point that some of these methods have been out for a long time (constrain
 
 ---
 
-# Mark Hill's contributions
+# Mark Hill's contributions &amp; MIMIC
 
 &lt;img src="index_files/figure-html/unnamed-chunk-13-1.png" width="1080" /&gt;
 
@@ -367,11 +367,12 @@ no improvement of process-based thinking
 
 ---
 
-# db-RDA &amp; PRC came a bit later
+# vegan
 
 &lt;img src="index_files/figure-html/unnamed-chunk-22-1.png" width="1080" /&gt;
 
 - Probabilistic PCA
+- PRC &amp; db-RDA
 - vegan!
 
 ???
@@ -404,7 +405,7 @@ no improvement of process-based thinking
 
 &lt;img src="index_files/figure-html/timeline2-1.png" width="1080" style="display: block; margin: auto;" /&gt;
 
-- this is where most courses broadly stop
+- This is where most courses broadly stop
 - Dun dun dun.. stagnation (courses in Norway still teach only methods from 90s)
 
 ???
@@ -441,8 +442,8 @@ no improvement of process-based thinking
 
 &lt;img src="index_files/figure-html/timeline4b-1.png" width="1080" style="display: block; margin: auto;" /&gt;
 
-- had few conceptual advances
-- slowed down quite a bit since the 80s
+- Had few conceptual advances
+- Slowed down quite a bit since the 80s
 
 ---
 
@@ -450,8 +451,8 @@ no improvement of process-based thinking
 
 &lt;img src="index_files/figure-html/timeline5-1.png" width="1080" style="display: block; margin: auto;" /&gt;
 
-- still a little crowded
-- a very active field
+- Still a little crowded
+- A very active field
 
 ???
 
@@ -465,7 +466,7 @@ class: middle,clear,center
 
 1) .orange["Simple-method"]
 
-2) .blue["Algorithm-based"]
+2) .blue["Distance-based"]
 
 3) .green["Model-based"]
 
@@ -483,7 +484,7 @@ class: middle,clear,center
 .pull-left[
 1) .orange["Simple-method"]
 
-2) .blue["Algorithm-based"]
+2) .blue["Distance-based"]
 
 3) .green["Model-based"]
 
@@ -497,7 +498,7 @@ class: middle,clear,center
 .blue[UMAP]&lt;br&gt;
 .blue[t-SNE]
 
-.green[Row-column interaction models]
+.green[Row-column interaction models] &lt;br&gt;
 .green[Generalized Linear Latent Variable Models]
 ]
 
@@ -525,7 +526,6 @@ My work is in &lt;b&gt;model-based ordination&lt;/b&gt;, let's have a closer loo
 - Synthesis of old &amp; new methods
 - Proposed HO
 
---
 
 &lt;img src="8-P1082654.jpg" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
 
@@ -577,6 +577,8 @@ g(\text{E}(y_{ij}|\boldsymbol{X}_i)) = \beta_{0j} + \boldsymbol{X}_i^\top \bolds
 - Can be fit using standard mixed-effects modeling software.
 
 .center[.font120[In &lt;tt&gt;lme4&lt;/tt&gt;: &lt;br&gt; `glmer(abundance~species+x:species+(0+species|sites),family="poisson",data=data)`]]
+
+- Number of parameters grows quadratically in species
 
 ???
 - just a multivariate model (swap species with really anything else)
@@ -725,7 +727,7 @@ class:clear,middle,center
 - So we created an unimodal model
 
 `\begin{equation}
-\eta_{ij} = \beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\gamma}_j \color{red}{- \boldsymbol{z}_i\boldsymbol{D}_k\boldsymbol{z}_i}
+\eta_{ij} = \beta_{0j} + \boldsymbol{z}_i^\top\boldsymbol{\gamma}_j \color{red}{- \boldsymbol{z}_i\boldsymbol{D}_j\boldsymbol{z}_i}
 \end{equation}`
 
 ???
@@ -812,8 +814,6 @@ with `\(\boldsymbol{z_i} = \boldsymbol{B}^\top\boldsymbol{x}_i + \boldsymbol{\ep
 
 - can be extended with unimodal model
 
---
-
 &lt;img src="van_der_Veen_et_al_2022.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
 
 
@@ -836,7 +836,7 @@ All that was left was to combine things;
 
 # Example concurrent: alpine plants (2)
 
-&lt;img src="index_files/figure-html/unnamed-chunk-42-1.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-42-1.png" width="60%" height="60%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -852,10 +852,10 @@ All that was left was to combine things;
 ---
 
 # Model-based ordination
-- more flexible &amp; statistically appropriate
-- now straightforward available
-- very much in active development
-- has a steep learning curve &amp; computational difficulties
+- More flexible &amp; statistically appropriate
+- Now straightforward available
+- Very much in active development
+- Has a steep learning curve &amp; computational difficulties
 
 Allows us to do all kinds of fun things
 - Residual diagnostics
@@ -954,8 +954,8 @@ A matrix relatedness of individuals?!--&gt;
 
 # Hierarchical ordination
 
-- in form much more similar to classical ordination
-- but with all model-based jazz
+- In form much more similar to classical ordination
+- But with all model-based jazz
 
 `\begin{aligned}
 \eta_{ij} &amp;= \beta_{0j} + \color{red}{\boldsymbol{z}_i}^\top\color{brown}{\boldsymbol{\Sigma}}\color{blue}{\boldsymbol{\gamma}_j} \\
@@ -964,9 +964,6 @@ A matrix relatedness of individuals?!--&gt;
 \end{aligned}`
 
 - `\(\color{brown}{\Sigma}\)` are a type of singular values under correct standardization
-
-
---
 
 &lt;img src="Ohara_vanderVeen_2023_HO.png" width="70%" height="70%" style="display: block; margin: auto;" /&gt;
 
@@ -1034,17 +1031,6 @@ Explain equation maybe color parts - we have lmms for the ordination axes &amp; 
 
 ---
 
-# Plenty of challenges
-
-- Complex model
-  - products of random-effects
-  - identifiability
-- No analytical solution (need approximate methods)
-- Computationally intensive (need fast fitting)
-- Non-convex objective function (need robust optimization)
-- Usability needs a lot of thought
-
----
 
 class:clear,middle,center
 
@@ -1066,16 +1052,28 @@ ordinate(y ~ pred1 + (1|ID),
 
 ---
 
+# Plenty of challenges
+
+- Complex model
+  - products of random-effects
+  - identifiability
+- No analytical solution (need approximate methods)
+- Computationally intensive (need fast fitting)
+- Non-convex objective function (need robust optimization)
+- Usability needs a lot of thought
+
+---
+
 # Towards the end
 
-- I think model-based ordination is the way, but not quite there yet
-- developments are very active and we need researchers to push the frontier
+- I think model-based ordination is the way
+- Developments are very active and we need researchers to push the frontier
   - ask new questions
   - show that existing methods are insufficient
   - apply new advances
   - update the course material
-- computation is again an active topic.
-- learning curve can be/is steep
+- Computation is again an active topic.
+- Learning curve can be/is steep
   - ordination should now be taught differently. The model-based angle
 
 ---
@@ -1085,7 +1083,6 @@ ordinate(y ~ pred1 + (1|ID),
 - A fourth corner model, MGLM, SEM, JSDM, ordination
 - Incorporate different types of data
 - Decompose different sources of residual covariance
-- A framework for multivariate multilevel analysis in ecology
 - Bonus: can make fancy bi/tri/quadri-plots
 
 &lt;img src="rule.jpg" width="40%" style="display: block; margin: auto;" /&gt;
@@ -1105,14 +1102,14 @@ It is a framework for complex (reduced rank) multivariate statistical modeling
 
 ---
 
-# Tomorrow: model-based ordination in R
+class:clear,middle
 
-&lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="workshop.png" alt="Jyväskylä" width="50%" /&gt;
-&lt;p class="caption"&gt;Jyväskylä&lt;/p&gt;
-&lt;/div&gt;
+## Tomorrow: workshop
 
+&lt;img src="workshop.png" width="90%" style="display: block; margin: auto;" /&gt;
 
+- First some presentation &amp; examples
+- Then own data
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>

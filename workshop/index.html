@@ -363,9 +363,9 @@ There is also coenoclines
 
 # Triplot
 
-- commonly used in constrained ordination
-- three quantities so "tri"
-- arrows indicate environment-axis relationship
+- Commonly used in constrained ordination
+- Three quantities so "tri"
+- Arrows indicate environment-axis relationship
 
 &lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" width="360" style="display: block; margin: auto;" /&gt;
 
@@ -417,7 +417,7 @@ class:clear,middle
 # .font70[Generalized Linear Latent Variable Models]
 
 - GLLVM for short (Skrondal &amp; Rabe-Hesketh, 2004)
-- a "joint" model
+- A "joint" model
 
 `\begin{equation}
 \eta_{ij} = \beta_{0j} + \boldsymbol{Z}\boldsymbol{\Gamma}
@@ -467,14 +467,16 @@ class:clear,middle
 
 # Comparing and selecting ordinations
 
-- you fit a model
-- you fit another model
-- which one is better?
+- You fit a model
+- You fit another model
+- Which one is better?
   - information criteria
   - hypothesis testing
-- but are the ordinations similar?
+- But are the ordinations similar?
   - procrustes rotation
-- variation explained (no eigenvalues)
+- Variation explained (no eigenvalues)
+
+&lt;b&gt; We can quantitatively assess what makes a good ordination &lt;/b&gt;
 
 ???
 
@@ -489,9 +491,9 @@ class:clear,middle
 # Some brief notes on rotation
  
 - LVs are estimated simultaneously
- - Rotation is not varimax
- - Solution can be re-rotated afterwards (see e.g., the GPArotation package)
-  - To certain species, to predictors, or by some criterium
+ - rotation is not varimax
+ - solution can be re-rotated afterwards (see e.g., the GPArotation package)
+  - to certain species, to predictors, or by some criterium
 
 &lt;img src="rotation.png" width="40%" style="display: block; margin: auto;" /&gt;
 
@@ -499,7 +501,7 @@ class:clear,middle
   
 # Different packages
 
-I will briefly go through the different model-based ordination packages
+I will briefly go through the different model-based ordination packages &lt;br&gt;
 NB: Quickly expanding field
 
 ???
@@ -977,18 +979,6 @@ note gllvm website: https://jenniniku.github.io/gllvm/index.html
 
 ---
 
-class:clear,center,middle
-
-&lt;img src="jenni2.jpeg" width="30%" /&gt;&lt;img src="hui.jpg" width="30%" /&gt;&lt;img src="pekka.jpg" width="30%" /&gt;&lt;img src="sara.jpeg" width="30%" /&gt;&lt;img src="warton.jpg" width="30%" /&gt;&lt;img src="bob.jpg" width="30%" /&gt;
-
-Jenni Niku (JYU), Francis Hui (ANU), Pekka Korhonen (JYU), Sara Taskinen (JYU), David Warton (UNSW), Bob O'Hara (NTNU)
-
-???
-
-many people are involved, here are some
-
----
-
 # Brief brief history of gllvm
 
 &lt;img src="Hui_et_al_2015.png" width="80%" style="display: block; margin: auto;" /&gt;
@@ -1036,8 +1026,8 @@ class: clear,middle
 \end{equation}`
 
 - "the GLM bit"
-- `\(\eta_{ij}\)` is the linear predictor
-- and `\(\mu_{ij} = g^{-1}(\eta_{ij})\)`
+- `\(\color{green}{\eta_{ij}}\)` is the linear predictor
+- and `\(\mu_{ij} = \color{brown}{g^{-1}}(\eta_{ij})\)`
 - non-linearity and mean-variance
 
 ---
@@ -1197,14 +1187,12 @@ https://jenniniku.github.io/gllvm/reference/index.html
 
 &lt;img src="MouseMandibles.png" width="60%" style="display: block; margin: auto;" /&gt;
 
-article: https://onlinelibrary.wiley.com/doi/full/10.1046/j.1365-2699.2003.00932.x⁠
-
 ---
 
-# 1) Start by plotting the data
+# Step 1: Start by plotting the data
 
 .center[
-&lt;img src="index_files/figure-html/unnamed-chunk-40-1.png" width="360" /&gt;&lt;img src="index_files/figure-html/unnamed-chunk-40-2.png" width="360" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-39-1.png" width="360" /&gt;&lt;img src="index_files/figure-html/unnamed-chunk-39-2.png" width="360" /&gt;
 ]
 
 What is the dimensionality of shape?
@@ -1230,9 +1218,9 @@ library(Momocs)
 data(apodemus)
 # "Apodemus" is a tibble that holds a list
 # to 3d array first
-dat &lt;- array(unlist(apodemus[[1]]),dim=c(nrow(apodemus[[1]][[1]]),2,length(apodemus[[1]])))
+dat3d &lt;- array(unlist(apodemus[[1]]),dim=c(nrow(apodemus[[1]][[1]]),2,length(apodemus[[1]])))
 # then to matrix
-dat&lt;-sapply(seq(dim(dat)[3]), function(x) matrix(unlist(apply(dat[,,x],1,c,simplify = F)),ncol=1))
+dat &lt;- sapply(seq(dim(dat3d)[3]), function(x) matrix(unlist(apply(dat3d[,,x],1,c,simplify = F)),ncol=1))
 ```
 
 ---
@@ -1345,7 +1333,7 @@ correlations &lt;- getResidualCor(mod.four)
 corrplot::corrplot(correlations, type="lower", order="AOE", diag=T, tl.col=c("brown","black","blue")[as.numeric(as.factor(unlist(apodemus[[2]][,3])))])
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-44-1.png" width="720" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-43-1.png" width="720" /&gt;
 
 ---
 
@@ -1394,7 +1382,7 @@ mod&lt;-gllvm(y = pyrifos, num.lv = 2, family = "tweedie")
 gllvm::ordiplot(mod,s.col=viridis::viridis(length(unique(X$week)))[as.numeric(as.factor(X$week))])
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-49-1.png" width="648" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-48-1.png" width="648" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1410,7 +1398,7 @@ mod.week&lt;-gllvm(y = pyrifos, X = X, formula = ~as.numeric(week), num.lv = 2, 
 gllvm::ordiplot(mod.week,s.col=viridis::viridis(length(unique(X$week)))[as.numeric(as.factor(X$week))])
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-52-1.png" width="648" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-51-1.png" width="648" style="display: block; margin: auto;" /&gt;
 
 ???
 
@@ -1426,7 +1414,7 @@ gllvm::ordiplot(mod.week,s.col=viridis::viridis(length(unique(X$week)))[as.numer
 coefplot(mod.week)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-53-1.png" width="504" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-52-1.png" width="504" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1437,7 +1425,7 @@ coefplot(mod.week)
 gllvm::ordiplot(mod.week, biplot =T, predict.region=T, s.col = scales::alpha("gray", 0.5), col.ellips = scales::alpha("gray", 0.5))
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-54-1.png" width="720" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-53-1.png" width="720" style="display: block; margin: auto;" /&gt;
 
 - two quantities
 - do not compare them
@@ -1479,7 +1467,6 @@ AICc(mod, mod.time)
 
 # Alternatively, as random row-effect
 
-(think of "ditch" as time)
 
 ```r
 mod&lt;-gllvm(y = pyrifos, num.lv = 2, family = "tweedie", 
@@ -1646,7 +1633,7 @@ vegan::procrustes(getLV(model.CO),getLV(model.CN),symmetric=T)
 gllvm::ordiplot(model.CN,biplot=T)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-70-1.png" width="504" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-69-1.png" width="504" /&gt;
 ]
 
 .pull-right[
@@ -1655,7 +1642,7 @@ gllvm::ordiplot(model.CN,biplot=T)
 coefplot(model.CN)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-71-1.png" width="504" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-70-1.png" width="504" /&gt;
 ]
 
 ???
@@ -1728,20 +1715,8 @@ zeta.struc = "common", n.init = 3, trace = T, quadratic="LV")
 - 8 regions from 3 countries
 
 
-```r
-data("microbialdata")
-Ysoil &lt;- microbialdata$Y
-Xenv &lt;- scale(microbialdata$Xenv[,1:3])
-sDesign&lt;-data.frame(Site=microbialdata$Xenv$Site)
-# for ordiplot later
-ph &lt;- microbialdata$Xenv$pH
-rbPal &lt;- colorRampPalette(c('mediumspringgreen', 'blue'))
-Colorsph &lt;- rbPal(20)[as.numeric(cut(ph, breaks = 20))]
-pchr = NULL
-pchr[microbialdata$Xenv$Region == "Kil"] = 1
-pchr[microbialdata$Xenv$Region == "NyA"] = 2
-pchr[microbialdata$Xenv$Region == "Aus"] = 3
-```
+&lt;img src="Kumar.png" width="80%" style="display: block; margin: auto;" /&gt;
+
 
 see vignette: https://jenniniku.github.io/gllvm/articles/vignette2.html
 ---
@@ -1777,7 +1752,28 @@ see also: https://github.com/JenniNiku/gllvm/issues/23
 
 ---
 
-# Step 1: Fit model
+# Step 1: Prepare data
+
+
+
+```r
+data("microbialdata")
+Ysoil &lt;- microbialdata$Y
+Xenv &lt;- scale(microbialdata$Xenv[,1:3])
+sDesign&lt;-data.frame(Site=microbialdata$Xenv$Site)
+# for ordiplot later
+ph &lt;- microbialdata$Xenv$pH
+rbPal &lt;- colorRampPalette(c('mediumspringgreen', 'blue'))
+Colorsph &lt;- rbPal(20)[as.numeric(cut(ph, breaks = 20))]
+pchr = NULL
+pchr[microbialdata$Xenv$Region == "Kil"] = 1
+pchr[microbialdata$Xenv$Region == "NyA"] = 2
+pchr[microbialdata$Xenv$Region == "Aus"] = 3
+```
+
+---
+
+# Step 2: Fit unconstrained ordination
 
 
 ```r
@@ -1791,7 +1787,7 @@ ftNULL &lt;- gllvm(Ysoil, studyDesign = sDesign, family = "negative.binomial", r
 
 ---
 
-# Step 2: Fit concurrent ordination
+# Step 3: Fit concurrent ordination
 
 
 ```r
@@ -1801,7 +1797,7 @@ ftCN &lt;- gllvm(Ysoil, X=Xenv, studyDesign = sDesign, family = "negative.binomi
 
 ---
 
-# Step 3: Uncertainties
+# Step 4: Uncertainties
 
 
 ```r
@@ -1824,7 +1820,7 @@ confint(ftCN,"LvXcoef")
 
 ---
 
-# Step 4: Variation explained
+# Step 5: Variation explained
 
 
 ```r
