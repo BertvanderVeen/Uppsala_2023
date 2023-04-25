@@ -63,6 +63,14 @@ class:clear,middle
 
 ---
 
+class:center,middle,clear
+
+## Slides, scripts etc
+
+https://github.com/BertvanderVeen/Uppsala_2023
+
+---
+
 # Gathering data
 
 We go out, register species at multiple sites &lt;br&gt;
@@ -1844,6 +1852,39 @@ partR2(ftCN) # function from van der Veen et al. 2022
 ## Partial R^2 for predictors and all LVs: 
 ##   X.SOM    X.pH X.Phosp 
 ##  0.0213  0.0409  0.0024
+```
+
+---
+
+# Step 6: Random canonical coefficients
+
+
+```r
+# Predictor-based shrinkage
+ftCN2 &lt;- update(ftCN,randomB="P")
+```
+
+
+```
+##                  CLV1          CLV2
+## X.SOM   -1.912832e-05 -3.789452e-06
+## X.pH    -3.246134e-01 -8.779444e-01
+## X.Phosp -1.499194e-04  8.440980e-04
+```
+
+
+```r
+# Predictor-based shrinkage
+ftCN3 &lt;- update(ftCN,randomB="LV")
+```
+
+
+
+```
+##                  CLV1        CLV2
+## X.SOM   -3.039004e-06 -0.06780234
+## X.pH    -8.266355e-06 -0.43729722
+## X.Phosp  3.406218e-06  0.01723565
 ```
 
 

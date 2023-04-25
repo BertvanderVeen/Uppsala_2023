@@ -6,6 +6,8 @@ data("microbialdata")
 # Models from the presentation are included and can be loaded as:
 # load("ftNULL.RData")
 # load("ftCN.RData")
+# load("ftCN2.RData")
+# load("ftCN3.RData")
 
 # Prepare data
 Ysoil <- microbialdata$Y
@@ -58,3 +60,12 @@ confint(ftCN,"LvXcoef") # now we can look at the CIs
 # Or a partial r^2 that also incorporates uncertainty:
 source("partR2.gllvm.R")
 partR2(ftCN)
+
+# We can add shrinkage. This can make ordination plots nicer.
+# We can add shrinkage to "select" predictors
+ftCN2 <- update(ftCN,randomB="P")
+
+# OR, LV-based shrinkage
+ftCN3 <- update(ftCN, randomB="LV")
+
+# More information on using "randomB" will be available soon in the gllvm vignette.

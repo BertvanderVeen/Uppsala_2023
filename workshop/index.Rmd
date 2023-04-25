@@ -52,6 +52,14 @@ class:clear,middle
 
 ---
 
+class:center,middle,clear
+
+## Slides, scripts etc
+
+https://github.com/BertvanderVeen/Uppsala_2023
+
+---
+
 # Gathering data
 
 We go out, register species at multiple sites <br>
@@ -1782,6 +1790,32 @@ source("partR2.gllvm.R")
 ```
 ```{r, echo=T, eval=T}
 partR2(ftCN) # function from van der Veen et al. 2022
+```
+
+---
+
+# Step 6: Random canonical coefficients
+
+```{r, echo=T, eval=F}
+# Predictor-based shrinkage
+ftCN2 <- update(ftCN,randomB="P")
+```
+
+```{r, echo=F, eval=T}
+# Predictor-based shrinkage
+load("/home/bertv/Dropbox/Uppsala/workshop/examples/ftCN2.RData")
+ftCN2$params$LvXcoef
+```
+
+```{r, echo=T, eval=F}
+# Predictor-based shrinkage
+ftCN3 <- update(ftCN,randomB="LV")
+```
+
+
+```{r, echo=F, eval=T}
+load("/home/bertv/Dropbox/Uppsala/workshop/examples/ftCN3.RData")
+ftCN3$params$LvXcoef
 ```
 
 
